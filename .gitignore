@@ -1,0 +1,6 @@
+*.o
+*.obj
+*.exe
+trial_error.cpp
+trial_error.h
+trialnerror.h
