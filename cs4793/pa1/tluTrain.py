@@ -59,7 +59,7 @@ class trainer:
             self.targets[self.label_data==self.unique_labels[i],i] = self.target_values[1]
         self.init_weights()
 
-        self.validate_file = np.loadtxt
+        self.validate_file = np.loadtxt(validate_file)
         self.validation_features = self.validate_file[:,1:]
         self.validation_targets = self.validate_file[:,0].astype(int)
 
