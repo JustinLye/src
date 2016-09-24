@@ -14,18 +14,22 @@ namespace jel {
 	//will encapsulate after getting the graph to work properly
 
 	class state {
-	public:
-		int _regval;
-		int _path_cost;
-		state* _parent;
-		state() : _regval(0), _path_cost(0), _parent(nullptr) {}
-		state(int regval, int path_cost) : _regval(regval), _path_cost(path_cost), _parent(nullptr) {}
-		state(int regval, int path_cost, state* path) : _regval(regval), _path_cost(path_cost), _parent(path) {}
+	private:
 		//member functions
 		void _out(std::ostream& s) const {
 			s << " {" << this->_regval << "} ";
 		}
+	public:
+		//member variables
+		int _regval;      //value in register
+		int _path_cost;   //path cost to get to this register
+		state* _parent;   //parent state node
 
+		//constructors
+		state() : _regval(0), _path_cost(0), _parent(nullptr) {}
+		state(int regval, int path_cost) : _regval(regval), _path_cost(path_cost), _parent(nullptr) {}
+		state(int regval, int path_cost, state* path) : _regval(regval), _path_cost(path_cost), _parent(path) {}
+		
 		//friends
 		friend std::ostream& operator<<(std::ostream& s, const state& st) {
 			st._out(s);
