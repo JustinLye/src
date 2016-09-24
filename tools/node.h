@@ -1,17 +1,18 @@
 #if !defined(__JEL_NODE_HEADER__)
 #define __JEL_NODE_HEADER__
 
-#include<istream>
+#include<iostream>
 
 namespace jel {
 	template<typename T>
 	class node {
-	private:
-		virtual void _out(std::ostream& s) const = 0;
 	public:
 		T info;
-		node() {}
-		node(T& init_info) : info(init_info) {}
+		node<T>* next;
+		node() : next(nullptr) {}
+		node(const T& n) : info(n), next(nullptr) {}
+		node(T* n) : info(*n), next(nullptr) {}
+
 	};
 
 }

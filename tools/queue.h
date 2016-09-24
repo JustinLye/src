@@ -12,16 +12,53 @@ simple queue structure
 */
 
 namespace jel {
+
 	template<typename T>
 	class queue {
 	private:
-		jel::node<T>* _head;
-		jel::node<T>* _tail;
-		virtual void _out(std::ostream& s) const = 0;
+		void _out(std::ostream& s) const {
+			node<T>* temp = _head;
+			while (temp != nullptr) {
+				s << temp->info;
+				temp = temp->next;
+			}
+		}
 	public:
+		node<T>* _head;
+		node<T>* _tail;
 		queue() : _head(nullptr), _tail(nullptr) {}
-		virtual void insert(jel::node<T>& n) = 0;
-		virtual jel::node<T> pop() = 0;
+		~queue() {
+			node<T>* temp = _head;
+			while (temp != nullptr) {
+				_head = _head->next;
+				delete temp;
+				temp = _head;
+			}
+		}
+		void insert(const T& n) {
+			node<T>* new_node = new node<T>(n);
+			if (_head == nullptr) {
+				_head = new_node;
+				_tail = new_node;
+			} else {
+				_tail->next = new_node;
+				_tail = new_node;
+			}
+		}
+		T pop() {
+			if (_head != nullptr) {
+				T ret = _head->info;
+				node<T>* temp = _head;
+				_head = _head->next;
+				delete temp;
+				return ret;
+			}
+			bool isempty() { return (_head == nullptr && _tail == nullptr); }
+		}
+		friend std::ostream& operator<<(std::ostream& s, const queue& q) {
+			q._out(s);
+			return s;
+		}
 	};
 }
 
