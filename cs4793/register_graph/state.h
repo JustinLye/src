@@ -17,7 +17,12 @@ namespace jel {
 	private:
 		//member functions
 		void _out(std::ostream& s) const {
-			s << " {" << this->_regval << "} ";
+#ifdef JELDEBUG
+			s << "Address: " << this <<  " {" << this->_regval << ", " << this->_path_cost << "} ";
+#else
+			s << " {" << this->_regval << ", " << this->_path_cost << "} ";
+#endif
+		
 		}
 	public:
 		//member variables
@@ -27,18 +32,25 @@ namespace jel {
 
 		//constructors
 		state() : _regval(0), _path_cost(0), _parent(nullptr) {}
+		state(const state& s) : _regval(s._regval), _path_cost(s._path_cost), _parent(s._parent) {}
 		state(int regval, int path_cost) : _regval(regval), _path_cost(path_cost), _parent(nullptr) {}
 		state(int regval, int path_cost, state* path) : _regval(regval), _path_cost(path_cost), _parent(path) {}
 		
+		bool operator==(const jel::state s) {
+			return ((this->_regval == s._regval && this->_path_cost == s._path_cost && this->_parent == s._parent));
+		}
+
 		//friends
 		friend std::ostream& operator<<(std::ostream& s, const state& st) {
 			st._out(s);
 			return s;
 		}
+#if !defined(JELDEBUG)
 		friend std::ostream& operator<<(std::ostream& s, const state* st) {
 			st->_out(s);
 			return s;
 		}
+#endif
 	};
 
 }
