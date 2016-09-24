@@ -38,21 +38,6 @@ namespace jel {
 		}
 	};
 
-	class state_node : public jel::node<state> {
-	private:
-		void _out(std::ostream& s) const {
-			s << this->info;
-		}
-	public:
-		state_node() {}
-		state_node(state& s) : jel::node<state>(s) {}
-		state_node(state s) : jel::node<state>(s) {}
-		friend std::ostream& operator<<(std::ostream& s, const state_node& sn) {
-			sn._out(s);
-			return s;
-		}
-
-	};
 }
 
 #endif
