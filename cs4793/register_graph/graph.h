@@ -30,13 +30,32 @@ namespace jel {
 			_current_state = state_node;
 #endif
 			if (state_node._regval == 1) {
-				_queue.insert(GenerateState(state_node, jel::ADD));
+				jel::state* temp = &GenerateState(state_node, jel::ADD);
+				_queue.insert(*temp);
+				delete temp;
+				std::cout << "after generate state\n";
 			} else {
-				_queue.insert(GenerateState(state_node, jel::DUB));
-				_queue.insert(GenerateState(state_node, jel::ADD));
-				_queue.insert(GenerateState(state_node, jel::SUB));
+				jel::state* temp = &GenerateState(state_node, jel::DUB);
+				_queue.insert(*temp);
+				delete temp;
+				temp = &GenerateState(state_node, jel::ADD);
+				_queue.insert(*temp);
+				delete temp;
+				//_queue.insert(GenerateState(state_node, jel::DUB));
+				std::cout << "after generate state\n";
+				temp = &GenerateState(state_node, jel::SUB);
+				_queue.insert(*temp);
+				delete temp;
+				//_queue.insert(GenerateState(state_node, jel::ADD));
+				std::cout << "after generate state\n";
+				//_queue.insert(GenerateState(state_node, jel::SUB));
+				std::cout << "after generate state\n";
 				if (state_node._regval % 3 == 0) {
-					_queue.insert(GenerateState(state_node, jel::DIV));
+					jel::state* temp = &GenerateState(state_node, jel::DIV);
+					_queue.insert(*temp);
+					delete temp;
+					//_queue.insert(GenerateState(state_node, jel::DIV));
+					std::cout << "after generate state\n";
 				}
 			}
 #ifdef JELDEBUG
@@ -46,19 +65,25 @@ namespace jel {
 		jel::state Dequeue() {
 			return _queue.pop();
 		}
-		jel::state GenerateState(jel::state& parent, jel::op operation) {
+		jel::state& GenerateState(jel::state& parent, jel::op operation) {
+			jel::state* temp = nullptr;
 			switch (operation) {
 			case ADD:
-				return jel::state(parent._regval + 1, parent._path_cost + 1, &parent);
+				std::cout << "generate state (ADD) creating temp\n";
+				temp = new jel::state(parent._regval + 1, parent._path_cost + 1, parent);
+				return *temp;
 				break;
 			case SUB:
-				return jel::state(parent._regval - 1, parent._path_cost + 1, &parent);
+				temp = new jel::state(parent._regval - 1, parent._path_cost + 1, parent);
+				return *temp;
 				break;
 			case DUB:
-				return jel::state(parent._regval * 2, parent._path_cost + parent._regval, &parent);
+				temp = new jel::state(parent._regval * 2, parent._path_cost + parent._regval, parent);
+				return *temp;
 				break;
 			case DIV:
-				return jel::state(parent._regval / 3, parent._path_cost + ((2 / 3)*parent._regval), &parent);
+				temp = new jel::state(parent._regval / 3, parent._path_cost + ((2 / 3)*parent._regval), parent);
+				return *temp;
 				break;
 			}
 		}

@@ -8,8 +8,15 @@ namespace jel {
 		T info;
 		node<T>* next;
 		node() : next(nullptr) {}
-		node(const T& n) : info(n), next(nullptr) {}
-		node(T* n) : info(*n), next(nullptr) {}
+		node(const T& n) : info(n), next(nullptr) {
+			std::cout << "creating node<T>: " << this << '\n';
+		}
+		//node(T* n) : info(*n), next(nullptr) {
+		//	std::cout << "creating node<T>: " << this << '\n';
+		//}
+		~node() {
+			std::cout << "deleting node<T>: " << this << '\n';
+		}
 
 	};
 

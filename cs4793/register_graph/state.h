@@ -31,11 +31,24 @@ namespace jel {
 		state* _parent;   //parent state node
 
 		//constructors
-		state() : _regval(0), _path_cost(0), _parent(nullptr) {}
-		state(const state& s) : _regval(s._regval), _path_cost(s._path_cost), _parent(s._parent) {}
-		state(int regval, int path_cost) : _regval(regval), _path_cost(path_cost), _parent(nullptr) {}
-		state(int regval, int path_cost, state* path) : _regval(regval), _path_cost(path_cost), _parent(path) {}
-		
+		state() : _regval(0), _path_cost(0), _parent(nullptr) {
+			std::cout << "creating state <T>: " << this << '\n';
+		}
+		state(const state& s) : _regval(s._regval), _path_cost(s._path_cost), _parent(s._parent) {
+			std::cout << "creating state <T>: " << this << '\n';
+		}
+		state(int regval, int path_cost) : _regval(regval), _path_cost(path_cost), _parent(nullptr) {
+			std::cout << "creating state <T>: " << this << '\n';
+		}
+		state(int regval, int path_cost, state* path) : _regval(regval), _path_cost(path_cost), _parent(path) {
+			std::cout << "creating state <T>: " << this << '\n';
+		}
+		state(int regval, int path_cost, state& path) : _regval(regval), _path_cost(path_cost), _parent(&path) {
+			std::cout << "creating state <T>: " << this << '\n';
+		}
+		~state() {
+			std::cout << "deleting state <T>: " << this << '\n';
+		}
 		bool operator==(const jel::state s) {
 			return ((this->_regval == s._regval && this->_path_cost == s._path_cost && this->_parent == s._parent));
 		}
@@ -45,12 +58,12 @@ namespace jel {
 			st._out(s);
 			return s;
 		}
-#if !defined(JELDEBUG)
-		friend std::ostream& operator<<(std::ostream& s, const state* st) {
-			st->_out(s);
-			return s;
-		}
-#endif
+//#if !defined(JELDEBUG)
+//		friend std::ostream& operator<<(std::ostream& s, const state* st) {
+//			st->_out(s);
+//			return s;
+//		}
+//#endif
 	};
 
 }

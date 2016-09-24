@@ -33,13 +33,14 @@ namespace jel {
 			while (temp != nullptr) {
 				_head = _head->next;
 #ifdef JELDEBUG
-				std::cout << "Deleting: " << temp->info << '\n';
+				std::cout << "Removing: " << temp->info << '\n';
 #endif
 				delete temp;
 				temp = _head;
 			}
 		}
 		virtual void insert(const T& n) {
+			std::cout << "alloc node\n";
 			node<T>* new_node = new node<T>(n);
 			if (_head == nullptr) {
 				_head = new_node;
