@@ -53,8 +53,8 @@ namespace jel {
 				delete temp;
 				return ret;
 			}
-			bool isempty() { return (_head == nullptr && _tail == nullptr); }
 		}
+		bool isempty() { return (_head == nullptr && _tail == nullptr); }
 		friend std::ostream& operator<<(std::ostream& s, const queue& q) {
 			q._out(s);
 			return s;

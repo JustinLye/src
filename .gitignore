@@ -7,3 +7,5 @@ trialnerror.h
 *.txt
 pa1plot.py
 *.npz
+cs4793/pa1/*.pdf
+tools/*.dll

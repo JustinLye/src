@@ -1,8 +1,6 @@
 #if !defined(__JEL_NODE_HEADER__)
 #define __JEL_NODE_HEADER__
 
-#include<iostream>
-
 namespace jel {
 	template<typename T>
 	class node {
