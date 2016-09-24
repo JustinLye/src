@@ -5,3 +5,5 @@ trial_error.cpp
 trial_error.h
 trialnerror.h
 *.txt
+pa1plot.py
+*.npz
