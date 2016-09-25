@@ -1,73 +1,33 @@
 #include<iostream>
-#include"..\..\tools\node.h"
-#include"state.h"
-#include"state_queue.h"
-//#include"graph.h"
+#include"graph.h"
 
-namespace jel {
-#if !defined(__JEL_REGISTER_OPS__)
-#define __JEL_REGISTER_OPS__
-	//enumeration of possible register operations
-	enum op { NONE, ROOT, ADD, SUB, DUB, DIV };
-#endif
-}
-jel::state& GenerateState(jel::state&, jel::op);
-void message(int line, const char* msg);
+int prompt();
+void setvalue(int);
 int main(int argc, char* argv[]) {
-	message(__LINE__, "");
-	jel::state s = jel::state(1, 0);
-	message(__LINE__, "");
-	jel::state_queue q;
-	message(__LINE__, "");
-	q.insert(s._regval, s._path_cost, s._parent);
-	message(__LINE__, "");
-	jel::state s0 = q.pop();
-	message(__LINE__, "");
-	q.insert(s0._regval + 1, 1, &s0);
-	message(__LINE__, "");
-	jel::state s1 = q.pop();
-	message(__LINE__, "");
-	q.insert(s1._regval + 1, s1._path_cost + 1, &s1);
-	message(__LINE__, "");
-	q.insert(s1._regval - 1, s1._path_cost + 1, &s1);
-	message(__LINE__, "");
-	q.insert(s1._regval * 2, s1._path_cost + s1._regval, &s1);
-	message(__LINE__, "");
-	std::cout << *s1._parent << '\n';
-	std::cout << &s1 << '\n';
-	message(__LINE__, "");
-	std::cout << q << '\n';
-	std::cout << q._garbage << '\n'; 
-
+	int val = prompt();
+	while (val >= 0) {
+		setvalue(val);
+		val = prompt();
+	}
 	
 	return 0;
 }
 
-void message(int line, const char* msg) {
-	std::cout << line << ' ' << msg << '\n';
+void setvalue(int val) {
+	jel::graph g;
+	jel::state s = g.Find(val);
+	//std::cout << "Nodes Expanded:\t" << g.NodesExpanded() << "\n\n";
+	std::cout << "Goal:\n" << s << "\n\n" << "Path:\n";
+	s.PrintHistory();
+	std::cout << "\n\nCurrent Queue:\nState(value) : { path cost, parent op }\n\n" << g._queue << '\n';
+	
 }
 
-jel::state& GenerateState(jel::state& parent, jel::op operation) {
-	jel::state* temp = nullptr;
-	switch (operation) {
-	case jel::ADD:
-#if defined(JELMEMTRACK)
-		std::cout << "generate state (ADD) creating temp\n";
-#endif
-		temp = new jel::state(parent._regval + 1, parent._path_cost + 1, parent);
-		return *temp;
-		break;
-	case jel::SUB:
-		temp = new jel::state(parent._regval - 1, parent._path_cost + 1, parent);
-		return *temp;
-		break;
-	case jel::DUB:
-		temp = new jel::state(parent._regval * 2, parent._path_cost + parent._regval, parent);
-		return *temp;
-		break;
-	case jel::DIV:
-		temp = new jel::state(parent._regval / 3, parent._path_cost + ((2 / 3)*parent._regval), parent);
-		return *temp;
-		break;
-	}
+
+int prompt() {
+	int val = 0;
+	std::cout << "Enter desired register value: ";
+	std::cin >> val;
+	return val;
 }
+

@@ -8,9 +8,13 @@
 */
 
 #include<iostream>
-
+#include"register_ops.h"
 namespace jel {
-
+#if !defined(__JEL_REGISTER_OPS__)
+#define __JEL_REGISTER_OPS__
+	//enumeration of possible register operations
+	enum op { NONE, ROOT, ADD, SUB, DUB, DIV };
+#endif
 	//will encapsulate after getting the graph to work properly
 
 	class state {
@@ -20,45 +24,59 @@ namespace jel {
 #if defined(JELDEBUG)
 			s << "Address: " << this <<  " {" << this->_regval << ", " << this->_path_cost << "} ";
 #else
-			s << " {" << this->_regval << ", " << this->_path_cost << "} ";
+			s << "State[value:=" << this->_regval << "]\t: {" << "cost:= " << this->_path_cost << ", parent op:= " << this->_op << "} ";
 #endif
 		
+		}
+		void _PrintHistory(jel::state* s) {
+			if (s == nullptr) {
+				return;
+			} else {
+				_PrintHistory(s->_parent);
+				std::cout << *s << '\n';
+			}
 		}
 	public:
 		//member variables
 		int _regval;      //value in register
 		int _path_cost;   //path cost to get to this register
+		op _op;
 		state* _parent;   //parent state node
 
 		//constructors
-		state() : _regval(0), _path_cost(0), _parent(nullptr) {
+		state() : _regval(0), _path_cost(0),_op(NONE), _parent(nullptr) {
 #if defined(JELMEMTRACK)
 			std::cout << "creating state <T> " << __LINE__ << ": " << this << '\n';
 #endif
 		}
-		state(const state& s) : _regval(s._regval), _path_cost(s._path_cost), _parent(s._parent) {
+		state(const state& s) : _regval(s._regval), _path_cost(s._path_cost), _op(s._op), _parent(s._parent) {
+#if defined(JELTEST)
+			std::cout << "creating state <T> " << __LINE__ << ": " << this << '\n';
+#endif
+		}
+		state(int regval, int path_cost) : _regval(regval), _path_cost(path_cost), _op(NONE), _parent(nullptr) {
 #if defined(JELMEMTRACK)
 			std::cout << "creating state <T> " << __LINE__ << ": " << this << '\n';
 #endif
 		}
-		state(int regval, int path_cost) : _regval(regval), _path_cost(path_cost), _parent(nullptr) {
+		state(int regval, int path_cost, jel::op oper) : _regval(regval), _path_cost(path_cost), _op(oper), _parent(nullptr) {
 #if defined(JELMEMTRACK)
 			std::cout << "creating state <T> " << __LINE__ << ": " << this << '\n';
 #endif
 		}
-		state(int regval, int path_cost, state* path) : _regval(regval), _path_cost(path_cost), _parent(path) {
+		state(int regval, int path_cost, jel::op oper, state* path) : _regval(regval), _path_cost(path_cost), _op(oper), _parent(path) {
 #if defined(JELMEMTRACK)
 			std::cout << "creating state <T> " << __LINE__ << ": " << this << '\n';
 #endif
 		}
-		state(int regval, int path_cost, state& path) : _regval(regval), _path_cost(path_cost), _parent(&path) {
+		state(int regval, int path_cost, jel::op oper, state& path) : _regval(regval), _path_cost(path_cost), _op(oper), _parent(&path) {
 #if defined(JELMEMTRACK)
 			std::cout << "creating state <T> " << __LINE__ << ": " << this << '\n';
 #endif
 		}
 		~state() {
-			if (this->_parent != nullptr)
-				delete this->_parent;
+			//if (this->_parent != nullptr)
+				//delete this->_parent;
 #if defined(JELMEMTRACK)
 			std::cout << "deleting state <T>: " << this << '\n';
 #endif
@@ -67,6 +85,16 @@ namespace jel {
 			return ((this->_regval == s._regval && this->_path_cost == s._path_cost && this->_parent == s._parent));
 		}
 
+		void PrintParents() {
+			jel::state* temp = this->_parent;
+			while (temp != nullptr) {
+				std::cout << "Parent:\t" << *temp << '\n';
+				temp = temp->_parent;
+			}
+		}
+		void PrintHistory() {
+			this->_PrintHistory(this);
+		}
 		//friends
 		friend std::ostream& operator<<(std::ostream& s, const state& st) {
 			st._out(s);

@@ -19,7 +19,7 @@ namespace jel {
 		void _out(std::ostream& s) const {
 			node<T>* temp = _head;
 			while (temp != nullptr) {
-				s << temp->info;
+				s << temp->info << '\n';
 				temp = temp->next;
 			}
 		}
@@ -38,17 +38,16 @@ namespace jel {
 				//std::cout << "Removing: " << temp->info << '\n';
 #endif
 			}
-			//if (_tail != nullptr) {
-				//delete _tail;
-			//}
+			if (_tail != nullptr) {
+				delete _tail;
+			}
 		}
 		virtual void insert(const T& n) {
-			std::cout << "alloc node\n";
 			node<T>* new_node = new node<T>(n);
 			if (_head == nullptr) {
 				_head = new_node;
 				_tail = new_node;
-				_head->next = _tail;
+				//_head->next = _tail;
 			} else {
 				_tail->next = new_node;
 				_tail = new_node;
@@ -64,9 +63,9 @@ namespace jel {
 				return ret;
 			}
 		}
-		virtual T peek() {
+		virtual T& peek() {
 			if (_head != nullptr) {
-				return T(_head->info);
+				return _head->info;
 			}
 		}
 		bool isempty() { return (_head == nullptr && _tail == nullptr); }
