@@ -7,15 +7,21 @@ namespace jel {
 	public:
 		T info;
 		node<T>* next;
-		node() : next(nullptr) {}
-		node(const T& n) : info(n), next(nullptr) {
-			std::cout << "creating node<T>: " << this << '\n';
+		node() : next(nullptr) {
+#if defined(JELMEMTRACK)
+			std::cout << "creating node<T> " << __LINE__ << ": " << this << '\n';
+#endif
 		}
-		//node(T* n) : info(*n), next(nullptr) {
-		//	std::cout << "creating node<T>: " << this << '\n';
-		//}
+		node(const T& n) : info(n), next(nullptr) {
+#if defined(JELMEMTRACK)
+			std::cout << "creating node<T> " << __LINE__ << ": " << this << '\n';
+#endif
+		}
+
 		~node() {
+#if defined(JELMEMTRACK)
 			std::cout << "deleting node<T>: " << this << '\n';
+#endif
 		}
 
 	};

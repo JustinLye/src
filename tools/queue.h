@@ -29,15 +29,18 @@ namespace jel {
 		queue() : _head(nullptr), _tail(nullptr) {}
 		~queue() {
 
-			node<T>* temp = _head;
-			while (temp != nullptr) {
-				_head = _head->next;
+			node<T>* temp = nullptr;
+			while (_head != nullptr) {
+				temp = _head->next;
+				delete _head;
+				_head = temp;
 #ifdef JELDEBUG
-				std::cout << "Removing: " << temp->info << '\n';
+				//std::cout << "Removing: " << temp->info << '\n';
 #endif
-				delete temp;
-				temp = _head;
 			}
+			//if (_tail != nullptr) {
+				//delete _tail;
+			//}
 		}
 		virtual void insert(const T& n) {
 			std::cout << "alloc node\n";
@@ -45,11 +48,13 @@ namespace jel {
 			if (_head == nullptr) {
 				_head = new_node;
 				_tail = new_node;
+				_head->next = _tail;
 			} else {
 				_tail->next = new_node;
 				_tail = new_node;
 			}
 		}
+
 		virtual T pop() {
 			if (_head != nullptr) {
 				T ret = _head->info;

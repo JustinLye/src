@@ -1,8 +1,7 @@
 #if !defined(__JEL_GRAPH_HEADER__)
 #define __JEL_GRAPH_HEADER__
 
-#include"..\..\tools\queue.h"
-#include"state.h"
+#include"state_queue.h"
 
 namespace jel {
 #if !defined(__JEL_REGISTER_OPS__)
@@ -14,7 +13,7 @@ namespace jel {
 	class graph {
 	public:
 		jel::state _root;
-		jel::queue<jel::state> _queue;
+		jel::state_queue _queue;
 		jel::queue<jel::state> _searched_queue;
 		jel::state _current_state;
 		graph() : _root(1, 0, nullptr) {
@@ -22,40 +21,51 @@ namespace jel {
 		}
 
 		void Expand() {
+			//jel::state* state_node = new jel::state(_queue.pop());
 			jel::state state_node = _queue.pop();
 
 #ifdef JELDEBUG
-			std::cout << "Popping: " << state_node << '\n';
-			_searched_queue.insert(state_node);
-			_current_state = state_node;
+			//std::cout << "Popping: " << state_node << '\n';
+			//_searched_queue.insert(state_node);
+			//_current_state = state_node;
 #endif
 			if (state_node._regval == 1) {
-				jel::state* temp = &GenerateState(state_node, jel::ADD);
+				jel::node<jel::state>* temp = &GenerateState(state_node, jel::ADD)->info;
 				_queue.insert(*temp);
-				delete temp;
+				////delete temp;
+#if defined(JELMEMTRACK)
 				std::cout << "after generate state\n";
+#endif
 			} else {
-				jel::state* temp = &GenerateState(state_node, jel::DUB);
+				jel::node<jel::state>* temp = &GenerateState(state_node, jel::DUB)->info;
 				_queue.insert(*temp);
-				delete temp;
+				//delete temp;
 				temp = &GenerateState(state_node, jel::ADD);
 				_queue.insert(*temp);
-				delete temp;
+				//delete temp;	
 				//_queue.insert(GenerateState(state_node, jel::DUB));
+#if defined(JELMEMTRACK)
 				std::cout << "after generate state\n";
-				temp = &GenerateState(state_node, jel::SUB);
+#endif
+				jel::node<jel::state>* temp = &GenerateState(state_node, jel::SUB)->info;
 				_queue.insert(*temp);
-				delete temp;
+				//delete temp;
 				//_queue.insert(GenerateState(state_node, jel::ADD));
+#if defined(JELMEMTRACK)
 				std::cout << "after generate state\n";
+#endif
 				//_queue.insert(GenerateState(state_node, jel::SUB));
+#if defined(JELMEMTRACK)
 				std::cout << "after generate state\n";
+#endif
 				if (state_node._regval % 3 == 0) {
-					jel::state* temp = &GenerateState(state_node, jel::DIV);
+					jel::node<jel::state>* temp = &GenerateState(state_node, jel::DIV)->info;
 					_queue.insert(*temp);
-					delete temp;
+					//delete temp;
 					//_queue.insert(GenerateState(state_node, jel::DIV));
+#if defined(JELMEMTRACK)
 					std::cout << "after generate state\n";
+#endif
 				}
 			}
 #ifdef JELDEBUG
@@ -65,25 +75,27 @@ namespace jel {
 		jel::state Dequeue() {
 			return _queue.pop();
 		}
-		jel::state& GenerateState(jel::state& parent, jel::op operation) {
-			jel::state* temp = nullptr;
+		jel::node<jel::state>* GenerateState(jel::state& parent, jel::op operation) {
+			jel::node<jel::state>* temp = nullptr;
 			switch (operation) {
 			case ADD:
+#if defined(JELMEMTRACK)
 				std::cout << "generate state (ADD) creating temp\n";
-				temp = new jel::state(parent._regval + 1, parent._path_cost + 1, parent);
-				return *temp;
+#endif
+				temp = new jel::node<jel::state>(parent._regval + 1, parent._path_cost + 1, &parent);
+				return temp;
 				break;
 			case SUB:
-				temp = new jel::state(parent._regval - 1, parent._path_cost + 1, parent);
-				return *temp;
+				temp = new jel::node<jel::state>(parent._regval - 1, parent._path_cost + 1, &parent);
+				return temp;
 				break;
 			case DUB:
-				temp = new jel::state(parent._regval * 2, parent._path_cost + parent._regval, parent);
-				return *temp;
+				temp = new jel::node<jel::state>(parent._regval * 2, parent._path_cost + parent._regval, &parent);
+				return temp;
 				break;
 			case DIV:
-				temp = new jel::state(parent._regval / 3, parent._path_cost + ((2 / 3)*parent._regval), parent);
-				return *temp;
+				temp = new jel::node<jel::state>(parent._regval / 3, parent._path_cost + ((2 / 3)*parent._regval), &parent);
+				return temp;
 				break;
 			}
 		}
