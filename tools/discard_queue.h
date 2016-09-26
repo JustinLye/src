@@ -8,6 +8,7 @@ namespace jel {
 		trash() {}
 		trash(void* location) : house_number(location) {}
 	};
+
 	class discard_queue {
 	public:
 		trash* trail_head;
@@ -20,7 +21,9 @@ namespace jel {
 			while (trail_head != nullptr) {
 				temp = trail_head;
 				trail_head = trail_head->next;
-				delete temp->house_number;
+				if (temp->house_number != nullptr) {
+					delete temp->house_number;
+				}
 				delete temp;
 			}
 		}

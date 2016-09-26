@@ -10,102 +10,57 @@
 #include<iostream>
 #include"register_ops.h"
 namespace jel {
-#if !defined(__JEL_REGISTER_OPS__)
-#define __JEL_REGISTER_OPS__
-	//enumeration of possible register operations
-	enum op { NONE, ROOT, ADD, SUB, DUB, DIV };
-#endif
-	//will encapsulate after getting the graph to work properly
-
 	class state {
-	private:
-		//member functions
-		void _out(std::ostream& s) const {
-#if defined(JELDEBUG)
-			s << "Address: " << this <<  " {" << this->_regval << ", " << this->_path_cost << "} ";
-#else
-			s << "State[value:=" << this->_regval << "]\t: {" << "cost:= " << this->_path_cost << ", parent op:= " << this->_op << "} ";
-#endif
-		
+	protected:
+		//private members
+		int register_value;
+		int path_cost;
+		operation parent_op;
+		state* parent_state;
+		state* next; //for queue
+		void print_function(std::ostream& s) const {
+			s << parent_op << "[" << register_value << "] ";
 		}
-		void _PrintHistory(jel::state* s) {
+		void _PrintHistory(state* s) {
 			if (s == nullptr) {
 				return;
 			} else {
-				_PrintHistory(s->_parent);
-				std::cout << s->_op << "[" << s->_regval << "] ";
+				_PrintHistory(s->parent_state);
+				std::cout << *s;
 			}
 		}
 	public:
-		//member variables
-		int _regval;      //value in register
-		int _path_cost;   //path cost to get to this register
-		jel::operation _op;
-		state* _parent;   //parent state node
+		//constructor
+		state(int register_val, int cost, operation par_op, state* parent) :
+			register_value(register_val), path_cost(cost), parent_op(par_op), parent_state(parent), next(nullptr) {}
+		
+		//getters
+		inline int RegisterValue() const { return register_value; }
+		inline int PathCost() const { return path_cost; }
+		inline operation ParentOp() const { return parent_op; }
+		inline const state* Parent() const { return parent_state; }
+		inline const state* Next() const { return next; }
 
-		//constructors
-		state() : _regval(0), _path_cost(0) ,_op(NONE), _parent(nullptr) {
-#if defined(JELMEMTRACK)
-			std::cout << "creating state <T> " << __LINE__ << ": " << this << '\n';
-#endif
-		}
-		state(const state& s) : _regval(s._regval), _path_cost(s._path_cost), _op(s._op), _parent(s._parent) {
-#if defined(JELTEST)
-			std::cout << "creating state <T> " << __LINE__ << ": " << this << '\n';
-#endif
-		}
-		state(int regval, int path_cost) : _regval(regval), _path_cost(path_cost), _op(NONE), _parent(nullptr) {
-#if defined(JELMEMTRACK)
-			std::cout << "creating state <T> " << __LINE__ << ": " << this << '\n';
-#endif
-		}
-		state(int regval, int path_cost, jel::operation oper) : _regval(regval), _path_cost(path_cost), _op(oper), _parent(nullptr) {
-#if defined(JELMEMTRACK)
-			std::cout << "creating state <T> " << __LINE__ << ": " << this << '\n';
-#endif
-		}
-		state(int regval, int path_cost, jel::operation oper, state* path) : _regval(regval), _path_cost(path_cost), _op(oper), _parent(path) {
-#if defined(JELMEMTRACK)
-			std::cout << "creating state <T> " << __LINE__ << ": " << this << '\n';
-#endif
-		}
-		state(int regval, int path_cost, jel::operation oper, state& path) : _regval(regval), _path_cost(path_cost), _op(oper), _parent(&path) {
-#if defined(JELMEMTRACK)
-			std::cout << "creating state <T> " << __LINE__ << ": " << this << '\n';
-#endif
-		}
-		~state() {
-			//if (this->_parent != nullptr)
-				//delete this->_parent;
-#if defined(JELMEMTRACK)
-			std::cout << "deleting state <T>: " << this << '\n';
-#endif
-		}
-		bool operator==(const jel::state s) {
-			return ((this->_regval == s._regval && this->_path_cost == s._path_cost && this->_parent == s._parent));
-		}
+		//setters
+		inline void SetRegisterValue(int val) { register_value = val; }
+		inline void SetPathCost(int val) { path_cost = val; }
+		inline void SetParentOp(operation& ops) { parent_op = ops; }
+		inline void SetParent(state* paren) { parent_state = paren; }
+		inline void SetNext(state* nxt) { next = nxt; }
 
-		void PrintParents() {
-			jel::state* temp = this->_parent;
-			while (temp != nullptr) {
-				std::cout << temp->_op << " ";
-				temp = temp->_parent;
-			}
-		}
+		//functions
 		void PrintHistory() {
 			this->_PrintHistory(this);
 		}
+
 		//friends
 		friend std::ostream& operator<<(std::ostream& s, const state& st) {
-			st._out(s);
+			st.print_function(s);
 			return s;
 		}
-//#if !defined(JELDEBUG)
-//		friend std::ostream& operator<<(std::ostream& s, const state* st) {
-//			st->_out(s);
-//			return s;
-//		}
-//#endif
+		friend class state_queue;
+		friend class graph;
+
 	};
 
 }
