@@ -40,11 +40,11 @@ namespace jel {
 		//member variables
 		int _regval;      //value in register
 		int _path_cost;   //path cost to get to this register
-		op _op;
+		jel::operation _op;
 		state* _parent;   //parent state node
 
 		//constructors
-		state() : _regval(0), _path_cost(0),_op(NONE), _parent(nullptr) {
+		state() : _regval(0), _path_cost(0) ,_op(NONE), _parent(nullptr) {
 #if defined(JELMEMTRACK)
 			std::cout << "creating state <T> " << __LINE__ << ": " << this << '\n';
 #endif
@@ -59,17 +59,17 @@ namespace jel {
 			std::cout << "creating state <T> " << __LINE__ << ": " << this << '\n';
 #endif
 		}
-		state(int regval, int path_cost, jel::op oper) : _regval(regval), _path_cost(path_cost), _op(oper), _parent(nullptr) {
+		state(int regval, int path_cost, jel::operation oper) : _regval(regval), _path_cost(path_cost), _op(oper), _parent(nullptr) {
 #if defined(JELMEMTRACK)
 			std::cout << "creating state <T> " << __LINE__ << ": " << this << '\n';
 #endif
 		}
-		state(int regval, int path_cost, jel::op oper, state* path) : _regval(regval), _path_cost(path_cost), _op(oper), _parent(path) {
+		state(int regval, int path_cost, jel::operation oper, state* path) : _regval(regval), _path_cost(path_cost), _op(oper), _parent(path) {
 #if defined(JELMEMTRACK)
 			std::cout << "creating state <T> " << __LINE__ << ": " << this << '\n';
 #endif
 		}
-		state(int regval, int path_cost, jel::op oper, state& path) : _regval(regval), _path_cost(path_cost), _op(oper), _parent(&path) {
+		state(int regval, int path_cost, jel::operation oper, state& path) : _regval(regval), _path_cost(path_cost), _op(oper), _parent(&path) {
 #if defined(JELMEMTRACK)
 			std::cout << "creating state <T> " << __LINE__ << ": " << this << '\n';
 #endif

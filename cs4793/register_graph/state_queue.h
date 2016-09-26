@@ -7,14 +7,14 @@ namespace jel {
 	class state_queue : public jel::queue<jel::state> {
 	public:
 		jel::queue<jel::state> _garbage;
-		void insert(long regval, long cost, jel::op oper, jel::state* parent) {
+		void insert(int regval, int cost, jel::op oper, jel::state* parent) {
 			jel::node<jel::state>* temp = new jel::node<jel::state>(jel::state(regval, cost, oper, parent));
 			if (_head == nullptr) {
 				_head = temp;
 				//_tail = temp;
-				//_head->next = _tail;
+				_head->next = _tail;
 				_tail = temp;
-				delete temp;	
+				//delete temp;
 			} else {
 				_tail->next = temp;
 				_tail = temp;

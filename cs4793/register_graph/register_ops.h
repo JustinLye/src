@@ -8,28 +8,36 @@ namespace jel {
 	//enumeration of possible register operations
 	enum op { NONE, ROOT, ADD, SUB, DUB, DIV };
 #endif
-	std::ostream& operator<<(std::ostream& s, op oper) {
-		switch (oper) {
-		case NONE:
-			s << "NO OP";
-			break;
-		case ROOT:
-			s << "ROOT";
-			break;
-		case ADD:
-			s << "ADD";
-			break;
-		case SUB:
-			s << "SUB";
-			break;
-		case DUB:
-			s << "DOUBLE";
-			break;
-		case DIV:
-			s << "DIVIDE";
-			break;
+	class operation {
+	public:
+		op oper;
+		operation(op o) : oper(o) {}
+		friend std::ostream& operator<<(std::ostream& s, jel::operation o) {
+			switch (o.oper) {
+			case NONE:
+				s << "NO OP";
+				break;
+			case ROOT:
+				s << "ROOT";
+				break;
+			case ADD:
+				s << "ADD";
+				break;
+			case SUB:
+				s << "SUB";
+				break;
+			case DUB:
+				s << "DOUBLE";
+				break;
+			case DIV:
+				s << "DIVIDE";
+				break;
+			}
+			return s;
 		}
-	}
+	};
+
+
 }
 
 

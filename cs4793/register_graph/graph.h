@@ -14,8 +14,9 @@ namespace jel {
 	private:
 		//int _expanded_nodes;
 	public:
+		jel::state _root;
 		jel::state_queue _queue;
-		graph() {
+		graph() : _root(1,0,jel::ROOT,nullptr) {
 			_queue.insert(1,0,jel::ROOT,nullptr);
 		}
 

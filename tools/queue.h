@@ -38,9 +38,9 @@ namespace jel {
 				//std::cout << "Removing: " << temp->info << '\n';
 #endif
 			}
-			if (_tail != nullptr) {
-				delete _tail;
-			}
+			//if (_tail != nullptr) {
+			// delete _tail;
+			//}
 		}
 		virtual void insert(const T& n) {
 			node<T>* new_node = new node<T>(n);
