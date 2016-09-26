@@ -9,3 +9,7 @@ pa1plot.py
 *.npz
 cs4793/pa1/*.pdf
 tools/*.dll
+*.sln
+*.VC.db
+*.VC.VC.opendb
+tools/Debug/*

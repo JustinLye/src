@@ -1,4 +1,15 @@
 
+/*
+	the trash class is a supplement to a queue. whenever the queue pops, instead of immediately
+	releasing memory, the queue will insert the address of the popped object into this queue.
+	when this queue is destroyed it will also destroy the objects inserted into the queue.
+
+    this class is an attempt to make sure allocated memory is released with the
+	state_queue is destroyed. It seems to work...using the vs2015 memory allocation tracking tool
+	it appears all memory allocated is released at the time main returns.
+
+	using this class may avoid memory leak; however it is very inefficent.
+*/
 
 namespace jel {
 	class trash {
