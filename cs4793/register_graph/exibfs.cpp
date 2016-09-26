@@ -15,7 +15,7 @@ int main(int argc, char* argv[]) {
 
 void setvalue(int val) {
 	jel::graph g;
-	jel::state s = g.Find(val);
+	jel::state s = g.FindTest(val);
 	std::cout << "Path:   ";
 	s.PrintHistory();
 	std::cout << "\nNodes Expanded:\t" << g.NodesExpanded() << " Queue Size:\t" << g.QueueSize() << "\n\n";

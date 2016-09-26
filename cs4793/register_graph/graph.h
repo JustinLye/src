@@ -7,8 +7,8 @@ namespace jel {
 
 	class graph {
 	private:
-		int _expanded_nodes;
-		int _queue_size;
+		long _expanded_nodes;
+		long _queue_size;
 		inline void Expand() {
 			_expanded_nodes++;
 			_queue_size--;
@@ -35,12 +35,20 @@ namespace jel {
 		}
 
 
-		int NodesExpanded() const {
+		long NodesExpanded() const {
 			return this->_expanded_nodes;
 		}
-		int QueueSize() const {
+		long QueueSize() const {
 			return this->_queue_size;
 		}
+
+		jel::state& FindTest(int target) {
+			while (target != _queue.peek()->register_value) {
+				this->Expand();
+			}
+			return _queue.pop();
+		}
+
 		jel::state& Find(int target) {
 			if (target == _queue.peek()->register_value) {
 				return _queue.pop();
