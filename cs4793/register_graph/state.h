@@ -33,7 +33,7 @@ namespace jel {
 				return;
 			} else {
 				_PrintHistory(s->_parent);
-				std::cout << *s << '\n';
+				std::cout << s->_op << "[" << s->_regval << "] ";
 			}
 		}
 	public:
@@ -88,7 +88,7 @@ namespace jel {
 		void PrintParents() {
 			jel::state* temp = this->_parent;
 			while (temp != nullptr) {
-				std::cout << "Parent:\t" << *temp << '\n';
+				std::cout << temp->_op << " ";
 				temp = temp->_parent;
 			}
 		}

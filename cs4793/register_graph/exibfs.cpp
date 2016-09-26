@@ -16,10 +16,11 @@ int main(int argc, char* argv[]) {
 void setvalue(int val) {
 	jel::graph g;
 	jel::state s = g.Find(val);
-	//std::cout << "Nodes Expanded:\t" << g.NodesExpanded() << "\n\n";
-	std::cout << "Goal:\n" << s << "\n\n" << "Path:\n";
+	std::cout << "Path:   ";
 	s.PrintHistory();
-	std::cout << "\n\nCurrent Queue:\nState(value) : { path cost, parent op }\n\n" << g._queue << '\n';
+	std::cout << "\nNodes Expanded:\t" << g.NodesExpanded() << " Queue Size:\t" << g.QueueSize() << "\n\n";
+	//std::cout << "\n\nCurrent Queue:\nState(value) : { path cost, parent op }\n\n" << g._queue << '\n';	
+
 	
 }
 

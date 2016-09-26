@@ -6,7 +6,7 @@ namespace jel {
 #if !defined(__JEL_REGISTER_OPS__)
 #define __JEL_REGISTER_OPS__
 	//enumeration of possible register operations
-	enum op { NONE, ROOT, ADD, SUB, DUB, DIV };
+	enum op { NONE, ONE, ADD, SUB, DUB, DIV };
 #endif
 	class operation {
 	public:
@@ -17,8 +17,8 @@ namespace jel {
 			case NONE:
 				s << "NO OP";
 				break;
-			case ROOT:
-				s << "ROOT";
+			case ONE:
+				s << "ONE";
 				break;
 			case ADD:
 				s << "ADD";

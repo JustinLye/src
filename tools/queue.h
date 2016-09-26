@@ -31,23 +31,27 @@ namespace jel {
 
 			node<T>* temp = nullptr;
 			while (_head != nullptr) {
-				temp = _head->next;
-				delete _head;
-				_head = temp;
+				temp = _head;
+				_head = _head->next;
+				delete temp;
 #ifdef JELDEBUG
 				//std::cout << "Removing: " << temp->info << '\n';
 #endif
 			}
-			//if (_tail != nullptr) {
-			// delete _tail;
-			//}
+			if (_tail != nullptr) {
+				_tail = nullptr;
+				//delete _tail;
+			}
 		}
 		virtual void insert(const T& n) {
 			node<T>* new_node = new node<T>(n);
 			if (_head == nullptr) {
 				_head = new_node;
-				_tail = new_node;
+				//_tail = new_node;
 				//_head->next = _tail;
+			} else if (_tail == nullptr) {
+				_tail = new_node;
+				_head->next = _tail;
 			} else {
 				_tail->next = new_node;
 				_tail = new_node;
