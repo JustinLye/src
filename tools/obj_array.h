@@ -1,3 +1,6 @@
+#if !defined(__JEL_OBJ_ARRAY_HEADER__)
+#define __JEL_OBJ_ARRAY_HEADER__
+
 #include<iostream>
 #include<cmath>
 #include"qsort.h"
@@ -10,11 +13,11 @@ namespace jel {
 	template<typename T>
 	class obj_array {
 	private:
-		double _capacity;
+		long _capacity;
 		long _size;
 		T* _base;
 		void resize() {
-			_capacity = std::powl(_capacity,2.0);
+			_capacity = static_cast<long>(std::pow(_capacity,2.0));
 			T* temp = new T[_capacity];
 			for (long i = 0; i < _size; i++) {
 				temp[i] = _base[i];
@@ -73,3 +76,5 @@ namespace jel {
 		}
 	};
 }
+
+#endif

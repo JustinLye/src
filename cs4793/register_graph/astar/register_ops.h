@@ -12,6 +12,28 @@ namespace jel {
 	public:
 		op oper;
 		operation(op o) : oper(o) {}
+		operation(const int& o) {
+			switch (o) {
+			case 1:
+				oper = ONE;
+				break;
+			case 2:
+				oper = ADD;
+				break;
+			case 3:
+				oper = SUB;
+				break;
+			case 4:
+				oper = DUB;
+				break;
+			case 5:
+				oper = DIV;
+				break;
+			default:
+				oper = NONE;
+				break;
+			}
+		}
 		friend std::ostream& operator<<(std::ostream& s, jel::operation o) {
 			switch (o.oper) {
 			case NONE:

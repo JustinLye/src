@@ -9,17 +9,19 @@
 
 #include<iostream>
 #include"register_ops.h"
+
 namespace jel {
 	class state {
 	protected:
 		//private members
 		int register_value;
 		int path_cost;
+		int* heap_key;
 		operation parent_op;
 		state* parent_state;
 		state* next; //for queue
 		void print_function(std::ostream& s) const {
-			s << parent_op << "[" << register_value << "] ";
+			s << parent_op << "[" << register_value << "/" << path_cost << "] ";
 		}
 		void _PrintHistory(state* s) {
 			if (s == nullptr) {
@@ -31,8 +33,9 @@ namespace jel {
 		}
 	public:
 		//constructor
+		state() : register_value(0), path_cost(0), heap_key(&path_cost), parent_op(NONE), next(nullptr) {}
 		state(int register_val, int cost, operation par_op, state* parent) :
-			register_value(register_val), path_cost(cost), parent_op(par_op), parent_state(parent), next(nullptr) {}
+			register_value(register_val), path_cost(cost), heap_key(&path_cost), parent_op(par_op), parent_state(parent), next(nullptr) {}
 		
 		//getters
 		inline int RegisterValue() const { return register_value; }
@@ -40,7 +43,7 @@ namespace jel {
 		inline operation ParentOp() const { return parent_op; }
 		inline const state* Parent() const { return parent_state; }
 		inline const state* Next() const { return next; }
-
+		inline int* HeapKey() { return heap_key; }
 		//setters
 		inline void SetRegisterValue(int val) { register_value = val; }
 		inline void SetPathCost(int val) { path_cost = val; }
@@ -53,6 +56,16 @@ namespace jel {
 			this->_PrintHistory(this);
 		}
 
+		//comparision operators (path_cost is evaluated)
+		bool operator<(const state& s) { return (this->path_cost < s.path_cost); }
+		bool operator<=(const state& s) { return (this->path_cost <= s.path_cost); }
+		bool operator>(const state& s) { return (this->path_cost > s.path_cost); }
+		bool operator>=(const state& s) { return (this->path_cost >= s.path_cost); }
+		bool operator<(const state* s) { return (s->path_cost < this->path_cost); }
+		bool operator<=(const state* s) { return (s->path_cost <= this->path_cost); }
+		bool operator>(const state* s) { return (s->path_cost > this->path_cost); }
+		bool operator>=(const state* s) { return (s->path_cost >= this->path_cost); }
+
 		//friends
 		friend std::ostream& operator<<(std::ostream& s, const state& st) {
 			st.print_function(s);
@@ -60,7 +73,7 @@ namespace jel {
 		}
 		friend class state_queue;
 		friend class graph;
-
+		friend class priority_queue;
 	};
 
 }

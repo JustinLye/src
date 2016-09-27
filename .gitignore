@@ -13,3 +13,5 @@ tools/*.dll
 *.VC.db
 *.VC.VC.opendb
 tools/Debug/*
+testing.cpp
+*.vs
