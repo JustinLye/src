@@ -15,3 +15,5 @@ tools/*.dll
 tools/Debug/*
 testing.cpp
 *.vs
+bin/*
+testing/*
