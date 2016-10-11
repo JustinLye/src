@@ -17,3 +17,9 @@ testing.cpp
 *.vs
 bin/*
 testing/*
+tools/bin/*
+tools/*.a
+*.dll
+*.a
+*.exp
+*.lib
