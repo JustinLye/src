@@ -1,11 +1,20 @@
 #include<iostream>
-#include"input.h"
-#include"sort.h"
+#include<random>
+#include<ctime>
+#include<iomanip>
+
+#include "utility.h"
 
 int main(int argc, char* argv[]) {
-	char x[100];
+	char user_input[100];
+	jel::uty::ConsoleRFI(user_input, 100,'\n', "enter something: ");
+	std::cout << "you typed: " << user_input << "\n\n";
+	std::cout << JEL_PRINT_PYTHON_LIKE_FORMAT << '\n';
+	std::cout << JEL_STATUS_NOT_OKAY << '\n';
+	std::cout << JEL_STATUS_OKAY << '\n';
+	std::cout << JEL_STATUS_UNKNOWN << '\n';
 	
-	jel::get_console_input(x, 100, '\n');
-	std::cout << "\nyou wrote " << x << '\n';
+
+
 	return 0;
 }

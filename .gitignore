@@ -23,3 +23,12 @@ tools/*.a
 *.a
 *.exp
 *.lib
+tools/temp_test*
+*.bat
+cs4793/pa2/*.pdf
+cs4793/progex1/*.pdf
+temp/*
+tools/password.cpp
+tools/password.h
+tools/pathcheck.cpp
+open_cv/*

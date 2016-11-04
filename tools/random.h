@@ -2,6 +2,7 @@
 #define __JEL_RANDOM_HEADER__
 #include<iostream>
 #include<random>
+#include<chrono>
 #include<ctime>
 namespace jel {
 	
@@ -21,7 +22,7 @@ namespace jel {
 		TypeName* operator()(TypeName size, TypeName low, TypeName high) {
 			TypeName* A = new TypeName[size];
 			for (TypeName index = 0; index < size; index++)
-				A[index] = jel::random(low,high);
+				A[index] = jel::random(low, high);
 			return A;
 		}
 	} random_array;
@@ -49,28 +50,28 @@ namespace jel {
 			}
 		}
 	};
-	tuple* spliter(long long size, long long cores) {
-		tuple* t = new tuple(cores * 2);
-		long long sub_size = ceil((size - 1) / cores);
-		long long i = 0;
-		long long j = 0;
-		for (i = 0; i < (cores - 1) * 2; i += 2) {
-			t->arg1[i] = j;
-			t->arg1[i + 1] = j + sub_size;
-			j += sub_size + 1;
-		}
-		t->arg1[i] = j;
-		(j < (size - 1)) ? t->arg1[i + 1] = j + ((size - 1) - j) : t->arg1[i + 1] = j;
-		return t;
-	}
+	//tuple* spliter(long long size, long long cores) {
+	//	tuple* t = new tuple(cores * 2);
+	//	long long sub_size = ceil((size - 1) / cores);
+	//	long long i = 0;
+	//	long long j = 0;
+	//	for (i = 0; i < (cores - 1) * 2; i += 2) {
+	//		t->arg1[i] = j;
+	//		t->arg1[i + 1] = j + sub_size;
+	//		j += sub_size + 1;
+	//	}
+	//	t->arg1[i] = j;
+	//	(j < (size - 1)) ? t->arg1[i + 1] = j + ((size - 1) - j) : t->arg1[i + 1] = j;
+	//	return t;
+	//}
 
 
-	void array_print(int* A, int s, int e) {
-		std::cout << "A [";
-		for (int i = s; i < e - 1; i++)
-			std::cout << A[i] << ", ";
-		std::cout << A[e - 1] << "] \n";
-	}
+	//void array_print(int* A, int s, int e) {
+	//	std::cout << "A [";
+	//	for (int i = s; i < e - 1; i++)
+	//		std::cout << A[i] << ", ";
+	//	std::cout << A[e - 1] << "] \n";
+	//}
 
 
 

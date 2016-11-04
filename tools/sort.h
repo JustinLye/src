@@ -33,7 +33,6 @@ namespace jel {
 		}
 	};
 #if !defined(__JEL_SORT_CPP__)
-//#define __JEL_RANDOM_HEADER__
 #include"sort.cpp"
 #endif
 }
