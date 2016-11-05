@@ -96,8 +96,8 @@ namespace nn {
 		mat activation_derivative;
 		mat network_error;
 		Layer_Data();
-		Layer_Data(const char*, int = -1);
-		Layer_Data(std::istream&,int = -1);
+		Layer_Data(const char*);
+		Layer_Data(std::istream&);
 
 		inline friend std::ostream& operator<<(std::ostream& s, const nn::Layer_Data& l) {
 			l.print(s);

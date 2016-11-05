@@ -62,7 +62,7 @@ nn::Layer_Data::Layer_Data() :
 	activation_derivative(1, 1),
 	network_error(1, 1) {}
 
-nn::Layer_Data::Layer_Data(const char* filename, int output_dimensions) :
+nn::Layer_Data::Layer_Data(const char* filename) :
 	input_stream(),
 	Net_Link(),
 	network_output(1, 1),
@@ -74,13 +74,13 @@ nn::Layer_Data::Layer_Data(const char* filename, int output_dimensions) :
 	if (!load_data(in)) {
 		std::cerr << "error: could not construct layer data\n\terror caused by failure in the load data routine\n";
 	} else {
-		redimensionalize(network_input.cols(), output_dimensions);
+		redimensionalize(network_input.cols());
 	}
 	in.close();
 }
 
 
-nn::Layer_Data::Layer_Data(std::istream& in, int output_dimensions) :
+nn::Layer_Data::Layer_Data(std::istream& in) :
 	input_stream(),
 	Net_Link(),
 	network_output(1, 1),
@@ -90,7 +90,7 @@ nn::Layer_Data::Layer_Data(std::istream& in, int output_dimensions) :
 	if (!load_data(in)) {
 		std::cerr << "error: could not construct layer data\n\terror caused by failure in the load data routine\n";
 	} else {
-		redimensionalize(network_input.cols(), output_dimensions);
+		redimensionalize(network_input.cols());
 
 	}
 }
