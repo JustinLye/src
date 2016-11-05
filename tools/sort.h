@@ -1,21 +1,24 @@
+#if !defined(__JEL_RANDOM_HEADER__)
+#include"random.h"
+#endif		
 #if !defined(__JEL_SORT_HEADER__)
 #define __JEL_SORT_HEADER__
+#if defined(JEL_BUILD_DLL)
+	#define CLASS_SORT __declspec(dllexport)
+#else
+	#define CLASS_SORT __declspec(dllimport)
+#endif	
 #include<ctime>
 #include<random>
-#include"random.h"
 
 namespace jel {
-	template<class ArrayType, typename IndexType = int>
-	class sort {
+	template<class ArrayType, typename IndexType = unsigned int>
+	class CLASS_SORT sort {
 	public:
-		sort() : {
+		sort() {
 			jel::random_seed(time(NULL));
 		}
-
-		inline void sort_array(ArrayType* A, IndexType start_index, IndexType end_index) {
-			_qsort(A, start_index, end_index);
-		}
-		void merge_array(ArrayType* A, IndexType Ls, IndexType Le, IndexType Rs, IndexType Re, IndexType JumpIndex -1);
+		void sort_array(ArrayType* A, IndexType start_index, IndexType end_index);
 	private:
 		void _qsort(ArrayType* A, IndexType start_idx, IndexType end_idx);
 		IndexType _partition(ArrayType* A, IndexType start_idx, IndexType end_idx);

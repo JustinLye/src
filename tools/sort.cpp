@@ -1,9 +1,17 @@
+
+
+#if !defined(__JEL_SORT_CPP__)
+#define __JEL_SORT_CPP__
+
 #if !defined(__JEL_SORT_HEADER__)
 #include "sort.h"
 #endif
 
-#if !defined(__JEL_SORT_CPP__)
-#define __JEL_SORT_CPP__
+template<class ArrayType, typename IndexType>
+void jel::sort<ArrayType, IndexType>::sort_array(ArrayType* A, IndexType start_index, IndexType end_index) {
+	std::cout << "i'm sorta busy right now..\n";
+	_qsort(A, start_index, end_index);
+}
 
 template<class ArrayType, typename IndexType>
 void jel::sort<ArrayType, IndexType>::_qsort(ArrayType* A, IndexType start_idx, IndexType end_idx) {
