@@ -46,7 +46,7 @@ namespace CS4793
          }
          data.push_back(tmpVec); 
       }
-      return flag;
+      return (flag && numCols != -1);
    }
 
                                   
@@ -119,6 +119,60 @@ namespace CS4793
          oneHotTargets(r, p->second) = inTarget;
       }
    return true;
+   }
+
+   bool loadDataFile(std::istream& in, Eigen::MatrixXd& data, Eigen::MatrixXd& oneHotTargets, int start_col, double inTarget, double outTarget) {
+	   std::vector<int> tags;
+	   std::set<int> uniqueTags;
+	   std::map<int, int> tag2node;
+
+	   std::vector<std::vector<double> > tmpD;
+	   if (!readDataAsVecOfVecs(in, tmpD)) {
+		   std::cerr << "Failed to read a matrix of values from stream." << std::endl;
+		   return false;
+	   }
+
+	   std::cout << tmpD.size() << '\n';
+
+	   if (tmpD.size() == 0 || tmpD[0].size() <= 1) {
+		   std::cerr << "Failed to read enough data" << std::endl;
+		   return false;
+	   }
+
+	   int numRows = int(tmpD.size());
+	   int numCols = int(tmpD[0].size()) - start_col; // assuming first element is class label
+
+											  // copy into Eigen Matrix
+	   data.resize(numRows, numCols);
+	   for (int r = 0; r < numRows; ++r) {
+		   for (int c = 0; c < numCols; ++c) {
+			   data(r, c) = tmpD[r][c + start_col];  // first element in tmpD is class tag, so use c+1 to skip
+		   }
+	   }
+
+	   // copy out class labels 
+	   tags.resize(numRows);
+	   for (int r = 0; r < numRows; ++r) {
+		   tags[r] = int(tmpD[r][0]);
+		   uniqueTags.insert(tags[r]);
+	   }
+	   int numClasses = int(uniqueTags.size());
+	   for (int t : uniqueTags) {
+		   int loc = int(tag2node.size());
+		   tag2node[t] = loc;
+	   }
+	   assert(tag2node.size() == uniqueTags.size());
+
+	   //and create one hot representation
+	   oneHotTargets.resize(numRows, numClasses);
+	   oneHotTargets.fill(outTarget); // most are outTarget values
+	   for (int r = 0; r<numRows; ++r) {
+		   auto p = tag2node.find(tags[r]);
+		   assert(p != tag2node.end()); // should not happen as all tags should be placed in tag2node
+		   oneHotTargets(r, p->second) = inTarget;
+	   }
+	   return true;
+
    }
 };
 

@@ -64,6 +64,15 @@ std::ostream& ai::operator<<(std::ostream& s, const ai::Network_Layer& n) {
 	return s;
 }
 
+ai::Layer_Info::Layer_Info(const ai::Layer_Info& l) :
+	input_rows(l.input_rows),
+	input_dims(l.input_dims),
+	output_dims(l.output_dims),
+	weights(l.weights),
+	bias(l.bias),
+	input(l.input),
+	output(l.output) {}
+
 ai::Layer_Info::Layer_Info(int rows, int in_dims, int out_dims, const ai::mat& layer_weights, const ai::vec& layer_bias, const ai::mat& layer_input, const ai::mat& layer_output) :
 	input_rows(rows),
 	input_dims(in_dims),
@@ -72,3 +81,23 @@ ai::Layer_Info::Layer_Info(int rows, int in_dims, int out_dims, const ai::mat& l
 	bias(layer_bias),
 	input(layer_input),
 	output(layer_output) {}
+
+ai::Training_Info::Training_Info(const Layer_Info& layer_info, int tar_dims, double true_target, double false_target, const ai::mat& layer_targets, const ai::mat& layer_errors) :
+	Layer_Info(layer_info),
+	target_dims(tar_dims),
+	in_target(true_target),
+	out_target(false_target),
+	targets(layer_targets),
+	errors(layer_errors) {}
+
+ai::Training_Info::Training_Info(
+	int rows, int in_dims, int out_dims,
+	const ai::mat& layer_weights, const ai::vec& layer_bias, const ai::mat& layer_input,
+	const ai::mat& layer_output, int tar_dims, double true_target,
+	double false_target, const ai::mat& layer_targets, const ai::mat& layer_errors) :
+	Layer_Info(rows, in_dims, out_dims, layer_weights, layer_bias, layer_input, layer_output),
+	target_dims(tar_dims),
+	in_target(true_target),
+	out_target(false_target),
+	targets(layer_targets),
+	errors(layer_errors) {}

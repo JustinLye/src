@@ -46,6 +46,14 @@ namespace CS4793
          std::map<int,int> &tag2node  // dictionary to map tags to location in 1-hot code 
          );
 
+   bool loadDataFile(std::istream &in,
+	   Eigen::MatrixXd &data,      // returns each line of stream in as row of data (with class label removed)
+	   Eigen::MatrixXd &oneHotTargets,  // one hot encoding of class labels, oneHotTargets.row(i) is for data.row(i)
+	   int start_col = 0,
+	   double inTarget = 0.9,   // value to use to true class in 1-hot code
+	   double outTarget = 0.1   // value to use for wrong classes in 1-hot code
+   );
+
       // todo: functions saveModelPA2 and loadModelPA2
 }
 #endif

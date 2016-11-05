@@ -35,7 +35,7 @@ ai::Layer_Manager::Layer_Manager(std::istream& in, int output_dims, int start_co
 	_links(&_weights, &_bias),
 	_input_layer(&_input_values),
 	_output_layer(&_output_values) {
-	if (!this->_set_input(in, start_col, output_dims, false)) {
+	if (!this->_get_input(in, start_col, output_dims, false)) {
 		std::cerr << "fatal error occurred constructing Layer_Manager\n";
 		throw std::runtime_error("fatal error occurred");
 	} else {
@@ -43,15 +43,42 @@ ai::Layer_Manager::Layer_Manager(std::istream& in, int output_dims, int start_co
 	}
 
 }
-	
+
+ai::Layer_Manager::Layer_Manager(std::istream& in, int output_dims, bool skip_set_input, int start_col) :
+	layer(nullptr),
+	_input_rows(1),
+	_input_dims(1),
+	_output_dims(1),
+	_weights(1, output_dims),
+	_bias(output_dims),
+	_input_values(1, 1),
+	_output_values(1, output_dims),
+	_activation_values(1, output_dims),
+	_output_node_layer(&_output_values, &_activation_values, &_derivative_values),
+	_links(&_weights, &_bias),
+	_input_layer(&_input_values),
+	_output_layer(&_output_values) {
+	if (!skip_set_input) {
+		if (!this->_get_input(in, start_col, output_dims, false)) {
+			std::cerr << "fatal error occurred constructing Layer_Manager\n";
+			throw std::runtime_error("fatal error occurred");
+		} else {
+			this->layer = new ai::Network_Layer(&_links, &_input_layer, &_output_layer);
+		}
+	} else {
+		this->layer = new ai::Network_Layer(&_links, &_input_layer, &_output_layer);
+	}
+
+}
+
 ai::Layer_Manager::~Layer_Manager() {
 	delete layer;
 }
 
-void ai::Layer_Manager::set_input(std::istream& in, int start_col, int output_dims, bool save_info) {
+void ai::Layer_Manager::get_data(std::istream& in, int start_col, int output_dims, bool save_info) {
 	if(output_dims < 0)
 		output_dims = this->_output_dims;
-	if (!_set_input(in, start_col, output_dims, save_info)) {
+	if (!_get_input(in, start_col, output_dims, save_info)) {
 		if (save_info) {
 			std::cerr << "Failure to set input. Layer has not been modified.\n";
 		} else {
@@ -91,7 +118,7 @@ void ai::Layer_Manager::feed_forward() {
 	this->_derivative_values = this->_activation_values.array() * (1.0 - this->_activation_values.array());
 }
 
-bool ai::Layer_Manager::_set_input(std::istream& in, int start_col, int output_dims, bool save_info) {
+bool ai::Layer_Manager::_get_input(std::istream& in, int start_col, int output_dims, bool save_info) {
 	bool flag = false;
 	std::vector<std::vector<double>> data;
 	ai::Layer_Info backup;

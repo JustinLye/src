@@ -17,8 +17,8 @@ namespace ai {
 
 		ai::Network_Layer* layer;
 
-		//reads data from file. Any information in current later is discarded.
-		void set_input(std::istream&, int = 0, int = -1, bool = true);
+		//reads data from file. Any information in current data is discarded.
+		virtual void get_data(std::istream&, int = 0, int = -1, bool = true);
 		void initialize_links();
 		void add_input_noise(int = AI_GAUSSIAN_NOISE, double = -1.0);
 		virtual void feed_forward();
@@ -38,10 +38,16 @@ namespace ai {
 		ai::Node_Layer _output_layer;
 		ai::noise _noise;
 
-		Layer_Manager() = delete;
-		bool _set_input(std::istream&, int, int, bool);
+		Layer_Manager(std::istream&, int, bool, int = 0); //constructor used by inherited class to skip reading the input file
+
+		virtual bool _get_input(std::istream&, int, int, bool);
 		void _backup_info(ai::Layer_Info&);
 		void _restore_info(const ai::Layer_Info&);
+
+	private:
+		Layer_Manager() = delete;
+		Layer_Manager(Layer_Manager&&) = delete;
+
 
 	};
 }

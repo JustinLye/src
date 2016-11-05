@@ -103,17 +103,20 @@ namespace ai {
 		ai::mat input;
 		ai::mat output;
 		Layer_Info() {}
+		Layer_Info(const Layer_Info&);
 		Layer_Info(int, int, int, const ai::mat&, const ai::vec&, const ai::mat&, const ai::mat&);
 	};
 
-	struct Training_Info {
-		Layer_Info layer_info;
-		ai::mat one_hot_targets;
+	struct Training_Info : Layer_Info {
+		int target_dims;
 		double in_target;
 		double out_target;
-		std::vector<int> class_tags;
-		std::set<int> unique_class_tags;
-		std::map<int, int> map_tags_to_1hot;
+		ai::mat targets;
+		ai::mat errors;
+		Training_Info() {}
+		Training_Info(const Layer_Info&, int, double, double, const ai::mat&, const ai::mat&);
+		Training_Info(int, int, int, const ai::mat&, const ai::vec&, const ai::mat&, const ai::mat&, int, double, double, const ai::mat&, const ai::mat&);
+
 	};
 
 
