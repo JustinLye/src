@@ -3,6 +3,10 @@
 //the examples better.
 
 #include<Eigen/Core>
+#include<vector>
+#include<set>
+#include<map>
+#include"pa_util.h"
 
 #if !defined(__AI_NET_STRUCTS_HEADER__)
 #define __AI_NET_STRUCTS_HEADER__
@@ -38,8 +42,8 @@ namespace ai {
 		Node_Layer(mat_ptr);
 		Node_Layer(const Node_Layer&);
 		
-		mat_ptr node_values;
-
+		mat_ptr network_value;
+		
 		friend std::ostream& operator<<(std::ostream& s, const Node_Layer& n);
 
 	private:
@@ -47,6 +51,34 @@ namespace ai {
 		Node_Layer(Node_Layer&& n) {}
 	};
 	
+	class Output_Node_Layer : private Node_Layer {
+	public:
+		Output_Node_Layer(mat_ptr, mat_ptr, mat_ptr);
+		Output_Node_Layer(const Output_Node_Layer&);
+		
+		mat_ptr network_activation;
+		mat_ptr network_activation_prime;
+		friend std::ostream& operator<<(std::ostream&, const Output_Node_Layer&);
+
+	private:
+		Output_Node_Layer() = delete;
+		Output_Node_Layer(Output_Node_Layer&&) = delete;
+	};
+
+
+	class Node_Linkage_Delta : private Node_Linkage {
+	public:
+		Node_Linkage_Delta(mat_ptr, vec_ptr, mat_ptr, vec_ptr);
+		Node_Linkage_Delta(const Node_Linkage&, mat_ptr, vec_ptr);
+		Node_Linkage_Delta(const Node_Linkage_Delta&);
+		ai::mat_ptr weights_delta;
+		ai::vec_ptr bias_delta;
+	private:
+		Node_Linkage_Delta() = delete;
+		Node_Linkage_Delta(Node_Linkage_Delta&&) = delete;
+	};
+
+
 	class Network_Layer {
 	public:
 		Network_Layer(Node_Linkage* node_linkage, Node_Layer* input_layer_ptr, Node_Layer* output_layer_ptr);
@@ -61,6 +93,29 @@ namespace ai {
 		Network_Layer() {}
 		Network_Layer(Network_Layer&& n) {}
 	};
+
+	struct Layer_Info {
+		int input_rows;
+		int input_dims;
+		int output_dims;
+		ai::mat weights;
+		ai::vec bias;
+		ai::mat input;
+		ai::mat output;
+		Layer_Info() {}
+		Layer_Info(int, int, int, const ai::mat&, const ai::vec&, const ai::mat&, const ai::mat&);
+	};
+
+	struct Training_Info {
+		Layer_Info layer_info;
+		ai::mat one_hot_targets;
+		double in_target;
+		double out_target;
+		std::vector<int> class_tags;
+		std::set<int> unique_class_tags;
+		std::map<int, int> map_tags_to_1hot;
+	};
+
 
 }
 

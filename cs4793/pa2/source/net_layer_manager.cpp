@@ -1,14 +1,7 @@
 #include "net_layer_manager.h"
 
 
-ai::Layer_Info::Layer_Info(int rows, int in_dims, int out_dims, const ai::mat& layer_weights, const ai::vec& layer_bias, const ai::mat& layer_input, const ai::mat& layer_output) :
-	input_rows(rows),
-	input_dims(in_dims),
-	output_dims(out_dims),
-	weights(layer_weights),
-	bias(layer_bias),
-	input(layer_input),
-	output(layer_output) {}
+
 
 ai::Layer_Manager::Layer_Manager(int input_rows, int input_dims, int output_dims) :
 	layer(nullptr),
@@ -16,12 +9,15 @@ ai::Layer_Manager::Layer_Manager(int input_rows, int input_dims, int output_dims
 	_input_dims(input_dims),
 	_output_dims(output_dims),
 	_weights(input_dims, output_dims),
-	_bias(input_dims),
-	_input(input_rows, input_dims),
-	_output(input_rows, output_dims),
+	_bias(output_dims),
+	_input_values(input_rows, input_dims),
+	_output_values(input_rows, output_dims),
+	_activation_values(input_rows, output_dims),
+	_derivative_values(input_rows, output_dims),
+	_output_node_layer(&_output_values, &_activation_values, &_derivative_values),
 	_links(&_weights, &_bias),
-	_input_layer(&_input),
-	_output_layer(&_output) {
+	_input_layer(&_input_values),
+	_output_layer(&_output_values) {
 	layer = new ai::Network_Layer(&_links, &_input_layer, &_output_layer);
 }
 
@@ -31,12 +27,14 @@ ai::Layer_Manager::Layer_Manager(std::istream& in, int output_dims, int start_co
 	_input_dims(1),
 	_output_dims(1),
 	_weights(1, output_dims),
-	_bias(1),
-	_input(1, 1),
-	_output(1, output_dims),
+	_bias(output_dims),
+	_input_values(1, 1),
+	_output_values(1, output_dims),
+	_activation_values(1, output_dims),
+	_output_node_layer(&_output_values, &_activation_values, &_derivative_values),
 	_links(&_weights, &_bias),
-	_input_layer(&_input),
-	_output_layer(&_output) {
+	_input_layer(&_input_values),
+	_output_layer(&_output_values) {
 	if (!this->_set_input(in, start_col, output_dims, false)) {
 		std::cerr << "fatal error occurred constructing Layer_Manager\n";
 		throw std::runtime_error("fatal error occurred");
@@ -46,7 +44,6 @@ ai::Layer_Manager::Layer_Manager(std::istream& in, int output_dims, int start_co
 
 }
 	
-
 ai::Layer_Manager::~Layer_Manager() {
 	delete layer;
 }
@@ -64,6 +61,36 @@ void ai::Layer_Manager::set_input(std::istream& in, int start_col, int output_di
 
 }
 
+void ai::Layer_Manager::initialize_links() {
+	this->_weights.setRandom() *= (1.0/(1.0 + sqrt(this->_output_dims)));
+	this->_bias.setRandom() *= (1.0/(1.0 + sqrt(this->_output_dims)));
+}
+
+void ai::Layer_Manager::add_input_noise(int method, double sigma) {
+	switch (method) {
+	case AI_ZERO_OUT_NOISE:
+		if (sigma <= 0) {
+			this->_noise.RandomZeroOut(this->_input_values);
+		} else {
+			this->_noise.RandomZeroOut(this->_input_values, sigma);
+		}
+		break;
+	default:
+		if (sigma <= 0) {
+			this->_noise.AddGaussianNoise(this->_input_values);
+		} else {
+			this->_noise.AddGaussianNoise(this->_input_values, sigma);
+		}
+		break;
+	}
+}
+
+void ai::Layer_Manager::feed_forward() {
+	this->_output_values = (this->_input_values * this->_weights).rowwise() + this->_bias;
+	this->_activation_values = 1.0/(Eigen::exp(this->_output_values.array()*-1.0) + 1.0);
+	this->_derivative_values = this->_activation_values.array() * (1.0 - this->_activation_values.array());
+}
+
 bool ai::Layer_Manager::_set_input(std::istream& in, int start_col, int output_dims, bool save_info) {
 	bool flag = false;
 	std::vector<std::vector<double>> data;
@@ -77,14 +104,14 @@ bool ai::Layer_Manager::_set_input(std::istream& in, int start_col, int output_d
 			this->_input_rows = int(data.size());
 			this->_input_dims = int(data[0].size() - start_col);
 			this->_output_dims = output_dims;
-			this->_input.resize(this->_input_rows, this->_input_dims);
+			this->_input_values.resize(this->_input_rows, this->_input_dims);
 			this->_weights.resize(this->_input_dims, this->_output_dims);
-			this->_bias.resize(this->_input_dims);
-			this->_output.resize(this->_input_rows, this->_output_dims);
+			this->_bias.resize(this->_output_dims);
+			this->_output_values.resize(this->_input_rows, this->_output_dims);
 
 			for (int r = 0; r < this->_input_rows; ++r) {
 				for (int c = 0; c < this->_input_dims; ++c) {
-					this->_input(r, c) = data[r][c + start_col];
+					this->_input_values(r, c) = data[r][c + start_col];
 				}
 			}
 		} catch (std::exception& e) {
@@ -101,19 +128,19 @@ bool ai::Layer_Manager::_set_input(std::istream& in, int start_col, int output_d
 }
 
 void ai::Layer_Manager::_backup_info(ai::Layer_Info& info) {
-	info = ai::Layer_Info(_input_rows, _input_dims, _output_dims, _weights, _bias, _input, _output);
+	info = ai::Layer_Info(_input_rows, _input_dims, _output_dims, _weights, _bias, _input_values, _output_values);
 }
 
 void ai::Layer_Manager::_restore_info(const ai::Layer_Info& info) {
 	this->_input_rows = info.input_rows;
 	this->_input_dims = info.input_dims;
 	this->_output_dims = info.output_dims;
-	this->_input.resize(this->_input_rows, this->_input_dims);
+	this->_input_values.resize(this->_input_rows, this->_input_dims);
 	this->_weights.resize(this->_input_dims, this->_output_dims);
-	this->_bias.resize(this->_input_dims);
-	this->_output.resize(this->_input_rows, this->_output_dims);
-	this->_input = info.input;
+	this->_bias.resize(this->_output_dims);
+	this->_output_values.resize(this->_input_rows, this->_output_dims);
+	this->_input_values = info.input;
 	this->_weights = info.weights;
 	this->_bias = info.bias;
-	this->_output = info.output;
+	this->_output_values = info.output;
 }

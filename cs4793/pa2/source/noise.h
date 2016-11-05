@@ -26,8 +26,10 @@ namespace ai {
 		noise();
 		void RandomZeroOut(std::vector<std::vector<double>>& input, std::vector<std::vector<double>>& output, double zero_out_pct = 0.40);
 		void RandomZeroOut(Eigen::MatrixXd& input, Eigen::Ref<Eigen::MatrixXd> output, double zero_out_pct = 0.40);
+		void RandomZeroOut(Eigen::Ref<Eigen::MatrixXd> input, double zero_out_pct = 0.40);
 		void AddGaussianNoise(std::vector<std::vector<double>>& input, std::vector<std::vector<double>>& output, double std_dev = 0.001);
 		void AddGaussianNoise(Eigen::MatrixXd& input, Eigen::Ref<Eigen::MatrixXd> output, double std_dev = 0.001);
+		void AddGaussianNoise(Eigen::Ref<Eigen::MatrixXd> input, double std_dev = 0.001);
 	protected:
 		std::random_device rd;
 		std::mt19937 gen;

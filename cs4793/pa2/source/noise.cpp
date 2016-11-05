@@ -26,6 +26,12 @@ void ai::noise::RandomZeroOut(Eigen::MatrixXd& input, Eigen::Ref<Eigen::MatrixXd
 
 }
 
+void ai::noise::RandomZeroOut(Eigen::Ref<Eigen::MatrixXd> input, double zero_out_pct) {
+	for (int i = 0; i < input.cols(); i++) {
+		ZeroOut(input, i, zero_out_pct);
+	}
+}
+
 void ai::noise::AddGaussianNoise(std::vector<std::vector<double>>& input, std::vector<std::vector<double>>& output, double std_dev) {
 	norm_dist = std::normal_distribution<double>(0.0,std_dev);
 	output.clear();
@@ -41,6 +47,14 @@ void ai::noise::AddGaussianNoise(Eigen::MatrixXd& input, Eigen::Ref<Eigen::Matri
 	output = input;
 	for (int i = 0; i < output.cols(); i++) {
 		GaussianNoise(output, i);
+	}
+
+}
+
+void ai::noise::AddGaussianNoise(Eigen::Ref<Eigen::MatrixXd> input, double std_dev) {
+	this->norm_dist = std::normal_distribution<double>(0.0, std_dev);
+	for (int i = 0; i < input.cols(); i++) {
+		GaussianNoise(input, i);
 	}
 
 }
