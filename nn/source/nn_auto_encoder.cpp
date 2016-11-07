@@ -164,11 +164,6 @@ void hidden_layer::set_errors(int rows_offset) {
 	}
 }
 
-void hidden_layer::update_links() {
-	
-
-
-}
 
 void hidden_layer::add_noise() {
 	has_noise_flag = false;
