@@ -17,8 +17,6 @@ namespace nn {
 
 
 	namespace encoder {
-		//To save a little time, I will only support one constructor of the hidden layer class.
-		//http://stackoverflow.com/questions/24609872/delete-virtual-function-from-a-derived-class/24610165
 		
 		class enviro_status : public nn::env::base_enviro_status {
 		public:
@@ -158,10 +156,7 @@ namespace nn {
 			training_assistant();
 			training_assistant(const training_assistant&);
 			training_assistant(training_assistant&&);
-			training_assistant(training_policy* init_policy, hidden_layer* init_network);
 
-			training_policy* policy;
-			//can probably get rid of network member since policy is equal to network.policy
 			hidden_layer* network;
 
 			virtual void train();

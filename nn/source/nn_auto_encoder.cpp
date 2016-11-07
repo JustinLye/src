@@ -53,7 +53,6 @@ void training_policy::print(std::ostream& s) const {
 hidden_layer::hidden_layer() :
 	base_hidden_layer(),
 	policy(nullptr),
-	//target(1, 1),
 	noised_input(1, 1),
 	targets_are_set(false),
 	input_has_noise(false),
@@ -66,7 +65,6 @@ hidden_layer::hidden_layer() :
 hidden_layer::hidden_layer(const hidden_layer& copy_layer) :
 	base_hidden_layer(copy_layer),
 	policy(nullptr),
-	//target(copy_layer.target),
 	noised_input(copy_layer.noised_input),
 	targets_are_set(copy_layer.targets_are_set),
 	input_has_noise(copy_layer.input_has_noise),
@@ -76,7 +74,6 @@ hidden_layer::hidden_layer(const hidden_layer& copy_layer) :
 hidden_layer::hidden_layer(hidden_layer&& move_layer) :
 	base_hidden_layer(move_layer),
 	policy(nullptr),
-	//target(std::move(move_layer.target)),
 	noised_input(std::move(move_layer.noised_input)),
 	targets_are_set(std::move(move_layer.targets_are_set)),
 	input_has_noise(std::move(move_layer.input_has_noise)),
@@ -85,59 +82,57 @@ hidden_layer::hidden_layer(hidden_layer&& move_layer) :
 hidden_layer::hidden_layer(nn::input_layer* init_input_layer, nn::output_layer* init_output_layer, const training_policy* init_training_policy) :
 	base_hidden_layer(init_input_layer, init_output_layer),
 	policy(init_training_policy),
-	//target(1, 1),
 	noised_input(1, 1),
 	targets_are_set(false),
 	input_has_noise(false),
 	is_complete(false) {
 	try {
-		if (input_nodes != nullptr && output_nodes != nullptr && policy != nullptr) {
-			//can probably get rid of target. should store target in the output_nodes layer network_targets matrix
-			//target = input_nodes->network_values;
-			output_nodes->network_targets.resize(input_nodes->network_values.rows(), input_nodes->network_values.cols());
-			output_nodes->network_targets = input_nodes->network_values;
-			targets_are_set = true;
-			noised_input = input_nodes->network_values;
-			switch (policy->noising_method()) {
-			case NN_ZERO_OUT_METHOD:
-				if (policy->noise_sigma() < 0) {
-					_noise_gen.RandomZeroOut(noised_input, training_policy::default_zero_out_pct);
-				} else {
-					_noise_gen.RandomZeroOut(noised_input, policy->noise_sigma());
-				}
-				break;
-			case NN_GAUSSIAN_METHOD:
-			default:
-				if (policy->noise_sigma() < 0) {
-					_noise_gen.AddGaussianNoise(noised_input, training_policy::default_gauss_std_dev);
-				} else {
-					_noise_gen.AddGaussianNoise(noised_input, policy->noise_sigma());
-				}
-				break;
-			}
-			input_has_noise = true;
-			if (policy->hidden_layer_dims() > 0) {
-				hidden_dims_are_set = true;
-				incoming_links.reset(input_nodes->network_values.cols(), policy->hidden_layer_dims());
-				incoming_links_are_set = true;
-				outgoing_links.reset(policy->hidden_layer_dims(), output_nodes->network_values.cols());
-				outgoing_links_are_set = true;
-				resize(input_nodes->network_values.rows(), policy->hidden_layer_dims());
-			} else {
-				throw std::runtime_error("error: hidden_layer construction failed. layer and/or policy information is incomplete");
-			}
-
-
-		} else {
-			throw std::runtime_error("error: hidden_layer construction failed. layer and/or policy information is incomplete");
-		}
+		initialize();
 	} catch (std::exception& e) {
-		std::cerr << "error: input_layer, output_layer, and the training policy must be complete. Will allow pointers to incomplete layers or policies at a later date.\n Please USE hidden_layer(input_layer*, output_layer*, const training_policy*)\n";
+		std::cerr << "error: hidden_layer was not constructed.\nnote: input_layer, output_layer, and the training policy must be complete. Will allow pointers to incomplete layers or policies at a later date.\n Please USE hidden_layer(input_layer*, output_layer*, const training_policy*)\n";
 		throw e;
 	}
 }
 
-void hidden_layer::initialize() {}
+void hidden_layer::initialize() {
+	if (input_nodes != nullptr && output_nodes != nullptr && policy != nullptr) {
+		output_nodes->network_targets.resize(input_nodes->network_values.rows(), input_nodes->network_values.cols());
+		output_nodes->network_targets = input_nodes->network_values;
+		targets_are_set = true;
+		noised_input = input_nodes->network_values;
+		switch (policy->noising_method()) {
+		case NN_ZERO_OUT_METHOD:
+			if (policy->noise_sigma() < 0) {
+				_noise_gen.RandomZeroOut(noised_input, training_policy::default_zero_out_pct);
+			} else {
+				_noise_gen.RandomZeroOut(noised_input, policy->noise_sigma());
+			}
+			break;
+		case NN_GAUSSIAN_METHOD:
+		default:
+			if (policy->noise_sigma() < 0) {
+				_noise_gen.AddGaussianNoise(noised_input, training_policy::default_gauss_std_dev);
+			} else {
+				_noise_gen.AddGaussianNoise(noised_input, policy->noise_sigma());
+			}
+			break;
+		}
+		input_has_noise = true;
+		if (policy->hidden_layer_dims() > 0) {
+			hidden_dims_are_set = true;
+			incoming_links.reset(input_nodes->network_values.cols(), policy->hidden_layer_dims());
+			incoming_links_are_set = true;
+			outgoing_links.reset(policy->hidden_layer_dims(), output_nodes->network_values.cols());
+			outgoing_links_are_set = true;
+			resize(input_nodes->network_values.rows(), policy->hidden_layer_dims());
+		} else {
+			throw std::runtime_error("error: hidden_layer initialization failed. layer and/or policy information is incomplete");
+		}
+	} else {
+		throw std::runtime_error("error: hidden_layer initialization failed. layer and/or policy information is incomplete");
+	}
+}
+	
 void hidden_layer::clear_delta() {}
 void hidden_layer::randomize_weights() {}
 void hidden_layer::feed_forward(int sample_size) {}
@@ -146,11 +141,10 @@ void hidden_layer::add_noise() {}
 void hidden_layer::self_diagnostic() {}
 
 training_assistant::training_assistant() :
-	policy(nullptr),
 	network(nullptr) {}
 training_assistant::training_assistant(const training_assistant& copy_assistant) {}
 training_assistant::training_assistant(training_assistant&& move_assistant) {}
-training_assistant::training_assistant(training_policy* init_policy, hidden_layer* init_network) {}
+
 void training_assistant::train() {}
 void training_assistant::prep_for_training() {}
 void training_assistant::prep_for_batch() {}
@@ -182,8 +176,6 @@ void auto_encoder::set_policy(const training_policy& init_policy) {
 	_policy = init_policy;
 	_policy_set_ind = &_policy;
 	_hidden = new hidden_layer(&_input, &_output, &_policy);
-	_trainer.policy = &_policy;
-	
 	_trainer.network = _hidden;
 
 }
