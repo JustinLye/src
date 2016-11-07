@@ -1,16 +1,16 @@
+#include<iostream>
 #if !defined(__NN_TRAINING_POLICY_HEADER__)
 #define __NN_TRAINING_POLICY_HEADER__
 
 namespace nn {
 
 	static const struct default_training_policy {
-		int batch_size = 120;
-		int max_epoch = 500;
-		double init_lrate = 10.0;
-		bool update_lrate = true;
-		//set to false b/c I am uncertain how to weight_reg_scaling is used, thus I do not really know what a good default value would be
-		bool use_weight_reg = false;
-		double weight_reg_scaling = 1.0;
+		static const int batch_size;
+		static const int max_epoch;
+		static const double init_lrate;
+		static const bool update_lrate;
+		static const bool use_weight_reg;
+		static const double weight_reg_scaling;
 	};
 
 	struct training_policy_info {
@@ -46,10 +46,13 @@ namespace nn {
 		virtual void update_lrate(bool) = 0;
 		virtual void use_weight_reg(bool) = 0;
 		virtual void weight_reg_scaling(double) = 0;
-
+		inline friend std::ostream& operator<<(std::ostream& s, const base_training_policy& p) {
+			p.print(s);
+			return s;
+		}
 	protected:
 		training_policy_info policy;
-		virtual void print() const;
+		virtual void print(std::ostream&) const;
 	private:
 		//base_training_policy() = delete;
 	};
