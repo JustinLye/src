@@ -3,7 +3,7 @@
 
 #include "net_layer_manager.h"
 
-namespace ai {
+namespace nn {
 	class Layer_Trainer : public Layer_Manager {
 	public:
 
@@ -19,8 +19,8 @@ namespace ai {
 		int _target_dims;
 		double _in_target;
 		double _out_target;
-		ai::mat _targets;
-		ai::mat _error_values;
+		nn::mat _targets;
+		nn::mat _error_values;
 
 
 	private:

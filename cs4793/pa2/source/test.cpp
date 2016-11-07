@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
 		std::cerr << "error occurred during attempt to open input file\n";
 		return 1;
 	}
-	ai::Layer_Manager l(input_file, 9, 1);
+	nn::Layer_Manager l(input_file, 9, 1);
 	l.initialize_links();
 	std::cout << *l.layer << '\n';
 	l.add_input_noise();

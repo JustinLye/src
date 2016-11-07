@@ -11,10 +11,13 @@ nn::input_layer::input_layer(const input_layer& copy_layer) {
 }
 nn::input_layer::input_layer(input_layer&& move_layer) : network_values(std::move(move_layer.network_values)) {}
 nn::input_layer::input_layer(const char* filename) {
-	if (!nn::read_raw_data(filename, network_values)) {
+	mat raw_data;
+	if (!nn::read_raw_data(filename, raw_data)) {
 		std::cerr << "error: input layer could not be constructed because of failure to read raw data from file: " << filename << std::endl;
 		throw std::runtime_error("error: could not read file");
 	}
+	network_values.resize(raw_data.rows(), raw_data.cols()-1);
+	network_values.block(0,0, network_values.rows(), network_values.cols()) = raw_data.block(0,1,network_values.rows(), network_values.cols());
 }
 nn::input_layer::input_layer(std::istream& in) {
 	if (!nn::read_raw_data(in, network_values)) {

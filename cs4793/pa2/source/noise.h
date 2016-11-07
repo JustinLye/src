@@ -9,7 +9,7 @@
 #if !defined(__AI_NOISE_HEADER__)
 #define __AI_NOISE_HEADER__
 
-namespace ai {
+namespace nn {
 	class noise_policy {
 	public:
 		static const double MIN_SWAPS;

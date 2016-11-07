@@ -51,6 +51,9 @@ nn::base_training_policy::base_training_policy(const base_training_policy& copy_
 nn::base_training_policy::base_training_policy(base_training_policy&& move_policy) :
 	policy(std::move(move_policy.policy)) {}
 
+nn::base_training_policy::base_training_policy(const training_policy_info& init_policy) :
+	policy(init_policy) {}
+
 void nn::base_training_policy::print(std::ostream& s) const {
 	s << "Training Policy:\n" << std::endl;
 	s << "\tBatch Size:\t" << policy.batch_size << std::endl;

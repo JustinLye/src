@@ -3,7 +3,7 @@
 
 
 
-ai::Layer_Manager::Layer_Manager(int input_rows, int input_dims, int output_dims) :
+nn::Layer_Manager::Layer_Manager(int input_rows, int input_dims, int output_dims) :
 	layer(nullptr),
 	_input_rows(input_rows),
 	_input_dims(input_dims),
@@ -18,10 +18,10 @@ ai::Layer_Manager::Layer_Manager(int input_rows, int input_dims, int output_dims
 	_links(&_weights, &_bias),
 	_input_layer(&_input_values),
 	_output_layer(&_output_values) {
-	layer = new ai::Network_Layer(&_links, &_input_layer, &_output_layer);
+	layer = new nn::Network_Layer(&_links, &_input_layer, &_output_layer);
 }
 
-ai::Layer_Manager::Layer_Manager(std::istream& in, int output_dims, int start_col) :
+nn::Layer_Manager::Layer_Manager(std::istream& in, int output_dims, int start_col) :
 	layer(nullptr),
 	_input_rows(1),
 	_input_dims(1),
@@ -39,12 +39,12 @@ ai::Layer_Manager::Layer_Manager(std::istream& in, int output_dims, int start_co
 		std::cerr << "fatal error occurred constructing Layer_Manager\n";
 		throw std::runtime_error("fatal error occurred");
 	} else {
-		this->layer = new ai::Network_Layer(&_links, &_input_layer, &_output_layer);
+		this->layer = new nn::Network_Layer(&_links, &_input_layer, &_output_layer);
 	}
 
 }
 
-ai::Layer_Manager::Layer_Manager(std::istream& in, int output_dims, bool skip_set_input, int start_col) :
+nn::Layer_Manager::Layer_Manager(std::istream& in, int output_dims, bool skip_set_input, int start_col) :
 	layer(nullptr),
 	_input_rows(1),
 	_input_dims(1),
@@ -63,19 +63,19 @@ ai::Layer_Manager::Layer_Manager(std::istream& in, int output_dims, bool skip_se
 			std::cerr << "fatal error occurred constructing Layer_Manager\n";
 			throw std::runtime_error("fatal error occurred");
 		} else {
-			this->layer = new ai::Network_Layer(&_links, &_input_layer, &_output_layer);
+			this->layer = new nn::Network_Layer(&_links, &_input_layer, &_output_layer);
 		}
 	} else {
-		this->layer = new ai::Network_Layer(&_links, &_input_layer, &_output_layer);
+		this->layer = new nn::Network_Layer(&_links, &_input_layer, &_output_layer);
 	}
 
 }
 
-ai::Layer_Manager::~Layer_Manager() {
+nn::Layer_Manager::~Layer_Manager() {
 	delete layer;
 }
 
-void ai::Layer_Manager::get_data(std::istream& in, int start_col, int output_dims, bool save_info) {
+void nn::Layer_Manager::get_data(std::istream& in, int start_col, int output_dims, bool save_info) {
 	if(output_dims < 0)
 		output_dims = this->_output_dims;
 	if (!_get_input(in, start_col, output_dims, save_info)) {
@@ -88,12 +88,12 @@ void ai::Layer_Manager::get_data(std::istream& in, int start_col, int output_dim
 
 }
 
-void ai::Layer_Manager::initialize_links() {
+void nn::Layer_Manager::initialize_links() {
 	this->_weights.setRandom() *= (1.0/(1.0 + sqrt(this->_output_dims)));
 	this->_bias.setRandom() *= (1.0/(1.0 + sqrt(this->_output_dims)));
 }
 
-void ai::Layer_Manager::add_input_noise(int method, double sigma) {
+void nn::Layer_Manager::add_input_noise(int method, double sigma) {
 	switch (method) {
 	case AI_ZERO_OUT_NOISE:
 		if (sigma <= 0) {
@@ -112,16 +112,16 @@ void ai::Layer_Manager::add_input_noise(int method, double sigma) {
 	}
 }
 
-void ai::Layer_Manager::feed_forward() {
+void nn::Layer_Manager::feed_forward() {
 	this->_output_values = (this->_input_values * this->_weights).rowwise() + this->_bias;
 	this->_activation_values = 1.0/(Eigen::exp(this->_output_values.array()*-1.0) + 1.0);
 	this->_derivative_values = this->_activation_values.array() * (1.0 - this->_activation_values.array());
 }
 
-bool ai::Layer_Manager::_get_input(std::istream& in, int start_col, int output_dims, bool save_info) {
+bool nn::Layer_Manager::_get_input(std::istream& in, int start_col, int output_dims, bool save_info) {
 	bool flag = false;
 	std::vector<std::vector<double>> data;
-	ai::Layer_Info backup;
+	nn::Layer_Info backup;
 	if (!CS4793::readDataAsVecOfVecs(in, data)) {
 		return flag;
 	} else {
@@ -154,11 +154,11 @@ bool ai::Layer_Manager::_get_input(std::istream& in, int start_col, int output_d
 	
 }
 
-void ai::Layer_Manager::_backup_info(ai::Layer_Info& info) {
-	info = ai::Layer_Info(_input_rows, _input_dims, _output_dims, _weights, _bias, _input_values, _output_values);
+void nn::Layer_Manager::_backup_info(nn::Layer_Info& info) {
+	info = nn::Layer_Info(_input_rows, _input_dims, _output_dims, _weights, _bias, _input_values, _output_values);
 }
 
-void ai::Layer_Manager::_restore_info(const ai::Layer_Info& info) {
+void nn::Layer_Manager::_restore_info(const nn::Layer_Info& info) {
 	this->_input_rows = info.input_rows;
 	this->_input_dims = info.input_dims;
 	this->_output_dims = info.output_dims;

@@ -11,7 +11,7 @@
 #if !defined(__AI_NET_STRUCTS_HEADER__)
 #define __AI_NET_STRUCTS_HEADER__
 
-namespace ai {
+namespace nn {
 	
 	typedef Eigen::MatrixXd mat;
 	typedef Eigen::RowVectorXd vec;
@@ -71,8 +71,8 @@ namespace ai {
 		Node_Linkage_Delta(mat_ptr, vec_ptr, mat_ptr, vec_ptr);
 		Node_Linkage_Delta(const Node_Linkage&, mat_ptr, vec_ptr);
 		Node_Linkage_Delta(const Node_Linkage_Delta&);
-		ai::mat_ptr weights_delta;
-		ai::vec_ptr bias_delta;
+		nn::mat_ptr weights_delta;
+		nn::vec_ptr bias_delta;
 	private:
 		Node_Linkage_Delta() = delete;
 		Node_Linkage_Delta(Node_Linkage_Delta&&) = delete;
@@ -98,24 +98,24 @@ namespace ai {
 		int input_rows;
 		int input_dims;
 		int output_dims;
-		ai::mat weights;
-		ai::vec bias;
-		ai::mat input;
-		ai::mat output;
+		nn::mat weights;
+		nn::vec bias;
+		nn::mat input;
+		nn::mat output;
 		Layer_Info() {}
 		Layer_Info(const Layer_Info&);
-		Layer_Info(int, int, int, const ai::mat&, const ai::vec&, const ai::mat&, const ai::mat&);
+		Layer_Info(int, int, int, const nn::mat&, const nn::vec&, const nn::mat&, const nn::mat&);
 	};
 
 	struct Training_Info : Layer_Info {
 		int target_dims;
 		double in_target;
 		double out_target;
-		ai::mat targets;
-		ai::mat errors;
+		nn::mat targets;
+		nn::mat errors;
 		Training_Info() {}
-		Training_Info(const Layer_Info&, int, double, double, const ai::mat&, const ai::mat&);
-		Training_Info(int, int, int, const ai::mat&, const ai::vec&, const ai::mat&, const ai::mat&, int, double, double, const ai::mat&, const ai::mat&);
+		Training_Info(const Layer_Info&, int, double, double, const nn::mat&, const nn::mat&);
+		Training_Info(int, int, int, const nn::mat&, const nn::vec&, const nn::mat&, const nn::mat&, int, double, double, const nn::mat&, const nn::mat&);
 
 	};
 

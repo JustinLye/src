@@ -23,6 +23,15 @@ namespace nn {
 		training_policy_info();
 		training_policy_info(const training_policy_info&);
 		training_policy_info(training_policy_info&&);
+		training_policy_info& operator=(const training_policy_info& copy_policy) {
+			this->batch_size = copy_policy.batch_size;
+			this->max_epoch = copy_policy.max_epoch;
+			this->init_lrate = copy_policy.init_lrate;
+			this->update_lrate = copy_policy.update_lrate;
+			this->use_weight_reg = copy_policy.use_weight_reg;
+			this->weight_reg_scaling = copy_policy.weight_reg_scaling;
+			return *this;
+		}
 	};
 
 	class base_training_policy {
@@ -30,6 +39,7 @@ namespace nn {
 		base_training_policy(bool = true);
 		base_training_policy(const base_training_policy&);
 		base_training_policy(base_training_policy&&);
+		base_training_policy(const training_policy_info&);
 
 		//getters
 		virtual int batch_size() const = 0;
@@ -50,6 +60,12 @@ namespace nn {
 			p.print(s);
 			return s;
 		}
+
+		base_training_policy& operator=(const base_training_policy& copy_policy) {
+			this->policy = copy_policy.policy;
+			return *this;
+		}
+
 	protected:
 		training_policy_info policy;
 		virtual void print(std::ostream&) const;

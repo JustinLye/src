@@ -1,6 +1,6 @@
 #include"net_layer_trainer.h"
 
-ai::Layer_Trainer::Layer_Trainer(int input_rows, int input_dims, int output_dims, int target_dims, double in_target, double out_target) :
+nn::Layer_Trainer::Layer_Trainer(int input_rows, int input_dims, int output_dims, int target_dims, double in_target, double out_target) :
 	Layer_Manager(input_rows, input_dims, output_dims),
 	_target_dims(output_dims),
 	_in_target(in_target),
@@ -15,7 +15,7 @@ ai::Layer_Trainer::Layer_Trainer(int input_rows, int input_dims, int output_dims
 	
 }
 
-ai::Layer_Trainer::Layer_Trainer(std::istream& in, int output_dims, int start_col, int target_dims, double in_target, double out_target) :
+nn::Layer_Trainer::Layer_Trainer(std::istream& in, int output_dims, int start_col, int target_dims, double in_target, double out_target) :
 	Layer_Manager(in, output_dims, true, start_col),
 	_target_dims(output_dims),
 	_in_target(in_target),
@@ -31,7 +31,7 @@ ai::Layer_Trainer::Layer_Trainer(std::istream& in, int output_dims, int start_co
 }
 
 
-bool ai::Layer_Trainer::get_data(std::istream& in) {
+bool nn::Layer_Trainer::get_data(std::istream& in) {
 	bool flag = CS4793::loadDataFile(in, this->_input_values, this->_targets, 1, this->_in_target, this->_out_target);
 	if (flag) {
 		this->_input_rows = this->_input_values.rows();
