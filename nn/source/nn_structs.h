@@ -30,8 +30,10 @@ namespace nn {
 		mat network_activation_prime;
 		mat network_sensitivity;
 		mat network_targets;
+		void clear_delta();
 	protected:
 		void resize(int, int);
+		
 	};
 
 	class layer_link {
@@ -54,6 +56,12 @@ namespace nn {
 		//getters
 		inline virtual int incoming_dims() const { return weights.rows(); }
 		inline virtual int outgoing_dims() const { return weights.cols(); }
+
+		//added delta to weights and bias
+		inline virtual void update() {
+			weights += weights_delta;
+			bias += bias_delta;
+		}
 
 		//public "bookkeeping" methods
 		//clears weights and bias delta accumulator

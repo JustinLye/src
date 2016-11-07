@@ -83,6 +83,12 @@ nn::output_layer::output_layer(int data_rows, int output_dims) :
 	network_sensitivity(data_rows, output_dims),
 	network_targets(data_rows, output_dims) {}
 
+void nn::output_layer::clear_delta() {
+	network_error.setZero();
+	network_sensitivity.setZero();
+}
+
+
 void nn::output_layer::resize(int data_rows, int output_dims) {
 	network_values.resize(data_rows, output_dims);
 	network_activation.resize(data_rows, output_dims);

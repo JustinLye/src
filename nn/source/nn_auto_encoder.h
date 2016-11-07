@@ -42,6 +42,9 @@ namespace nn {
 			training_policy(const nn::training_policy_info&);
 			training_policy(const nn::training_policy_info&,int, int);
 
+			//current learning rate
+			double lrate;
+
 			//some default constants
 			static const double default_zero_out_pct;
 			static const double default_gauss_std_dev;
@@ -95,55 +98,62 @@ namespace nn {
 			hidden_layer(const hidden_layer&);
 			hidden_layer(hidden_layer&&);
 			hidden_layer(input_layer*, output_layer*, const training_policy*);
-			//override base class initalize method. will 
-			//will noise the input here
-			//set member variables, create links, etc.
-			virtual void initialize();
-			virtual void clear_delta();
-			virtual void randomize_weights();
-			//feed input layer through network. 
-			virtual void feed_forward(int);
-			//backpropagate network error. assumes feed_forward has been called and errors have been set
-			virtual void back_propogate(int);
 
-			inline virtual bool has_valid_policy() const { return (policy != nullptr); }
-			inline virtual bool has_input_nodes() const { return (input_nodes != nullptr); }
-			inline virtual bool has_output_nodes() const { return (output_nodes != nullptr); }
-			inline virtual bool has_target() const { return targets_are_set; }
-			inline virtual bool has_noisy_input() const { return input_has_noise; }
-			inline virtual bool has_hidden_dims() const {
-				if (policy != nullptr) {
-					return (policy->hidden_layer_dims() > 0);
-				} else {
-					return false;
+			virtual void initialize();
+			virtual void training_step(int rows_offset) {
+				if (!can_train()) {
+					print_layer_status_errors("hidden_layer training step was not performed.");
+					throw std::runtime_error("error: attempt to peform hidden_layer training step failed");
 				}
+				feed_forward(rows_offset);
+				back_propogate(rows_offset);
+				set_errors(rows_offset);
+				update_links();
 			}
 
+			//training_step helper functions for batch training
+			//todo: move training_step functions to protected or private section
+			virtual void feed_forward(int = 0);
+			virtual void back_propogate(int = 0);
+			virtual void set_errors(int = 0);
+			inline virtual void update_links() {
+				incoming_links.update();
+				outgoing_links.update();
+			}
+
+			//clean-up helper functions for batch training
+			virtual void clear_delta();
+			virtual void randomize_weights();
+
+			//status functions 
+			inline bool is_complete() const { return (input_nodes != nullptr && output_nodes != nullptr && policy != nullptr); }
+			inline bool can_train() const { return (is_complete() && has_noise_flag && has_targets_flag && dim_links_flag); }
+
 		private:
-			//training policy. will get hidden dims and noising method specified in the policy
 			const training_policy* policy;
-			//will be original input
-			//mat target;
-			//storage for noised input
 			mat noised_input;
-			//helper function to add noist to the input
-			virtual void add_noise();
-			
-			//flags to use during initialization
-			bool targets_are_set;
-			bool input_has_noise;
-			bool is_complete;
-			bool incoming_links_are_set;
-			bool outgoing_links_are_set;
-			bool hidden_dims_are_set;
 			nn::noise _noise_gen;
 
-			//sets the is_complete flag to false if any critical members are incomplete
-			void self_diagnostic();
+			//will be used during training step functions if there is a size conflict between the data and the batch size
+			inline int get_sample_size(int rows_offset) const {
+				return std::min(input_nodes->network_values.rows() - rows_offset, policy->batch_size());
+			}
+
+			//flags
+			bool has_noise_flag;
+			bool has_targets_flag;
+			bool dim_links_flag;
+
+			//initialization helper functions
+			virtual void add_noise();
+			virtual void set_target();
+			virtual void dim_links();
+
+			virtual void print_layer_status_warnings(const char* = nullptr) const;
+			virtual void print_layer_status_errors(const char* = nullptr) const;
 
 			//inaccessible members
-			virtual void feed_forward() {}
-			virtual void back_propogate() {}
+
 			hidden_layer(mat&) = delete;
 			hidden_layer(int, int) = delete;
 			hidden_layer(input_layer*, output_layer*) = delete;
