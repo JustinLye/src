@@ -1,13 +1,6 @@
 
 #include"nn_training_policy.h"
 
-const int nn::default_training_policy::batch_size = 120;
-const int nn::default_training_policy::max_epoch = 500;
-const double nn::default_training_policy::init_lrate = 10.0;
-const bool nn::default_training_policy::update_lrate = true;
-//set to false b/c I am uncertain how to weight_reg_scaling is used, thus I do not really know what a good default value would be
-const bool nn::default_training_policy::use_weight_reg = false;
-const double nn::default_training_policy::weight_reg_scaling = 1.0;
 
 nn::training_policy_info::training_policy_info() :
 	batch_size(nn::default_training_policy::batch_size),

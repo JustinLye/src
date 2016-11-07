@@ -4,13 +4,15 @@
 
 namespace nn {
 
-	static const struct default_training_policy {
-		static const int batch_size;
-		static const int max_epoch;
-		static const double init_lrate;
-		static const bool update_lrate;
-		static const bool use_weight_reg;
-		static const double weight_reg_scaling;
+	namespace default_training_policy {
+		static const int batch_size = 120;
+		const int max_epoch = 500;
+		const double init_lrate = 10.0;
+		const bool update_lrate = true;
+		//set to false b/c I am uncertain how to weight_reg_scaling is used, thus I do not really know what a good default value would be
+		const bool use_weight_reg = false;
+		const double weight_reg_scaling = 1.0;
+
 	};
 
 	struct training_policy_info {

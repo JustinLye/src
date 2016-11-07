@@ -1,24 +1,22 @@
 #include<iostream>
 #include<fstream>
-#include"fann_util.h"
+
+#include"auto_encoder.h"
 
 
 int main(int argc, char* argv[]) {
+	nn::encoder::training_policy tpolicy;
+	tpolicy.batch_size(100);
+	tpolicy.max_epoch(1000);
+	tpolicy.hidden_layer_dims(70);
+	tpolicy.noise_sigma(0.004);
+	tpolicy.noising_method(NN_GAUSSIAN_METHOD);
+	std::cout << tpolicy << std::endl;
 	if (argc > 1) {
-		nn::mat data;
-		nn::mat in_data;
-		nn::mat target;
-		std::ifstream in;
-		in.open(argv[1]);
-		if (nn::read_raw_data(in, data)) {
-			std::cout << "raw data\n" << data << '\n';
-			nn::process_raw_data(data, in_data, target);
-			std::cout << "input data\n" << in_data << '\n';
-			std::cout << "target data\n" << target << '\n';
-		} else {
-			std::cerr << "error: load raw data failed\n";
-		}
-		in.close();
+		nn::encoder::auto_encoder a(argv[1]);
+		a.set_policy(tpolicy);
+		std::cout << a._input.network_values << std::endl;
+		std::cout << "(" << a._hidden->incoming_links.weights.rows() << "," << a._hidden->incoming_links.weights.cols() << ")" << std::endl;
 
 	}
 

@@ -77,6 +77,11 @@ namespace nn {
 				return *this;
 			}
 
+			friend std::ostream& operator<<(std::ostream& s, const training_policy& p) {
+				p.print(s);
+				return s;
+			}
+
 		protected:
 			//training_policy_info policy;
 			int _noising_method;
@@ -219,7 +224,9 @@ namespace nn {
 					return false;
 				}
 			}
-		private:
+			//switch to public temporarily
+		public:
+//		private:
 			input_layer _input;
 			output_layer _output;
 			hidden_layer* _hidden;
