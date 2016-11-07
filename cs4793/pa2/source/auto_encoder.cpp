@@ -26,7 +26,7 @@ void hidden_layer::add_noise() {}
 training_assistant::training_assistant() {}
 training_assistant::training_assistant(const training_assistant& copy_assistant) {}
 training_assistant::training_assistant(training_assistant&& move_assistant) {}
-training_assistant::training_assistant::training_assistant(training_policy* init_policy, hidden_layer* init_network) {}
+training_assistant::training_assistant(training_policy* init_policy, hidden_layer* init_network) {}
 void training_assistant::train() {}
 void training_assistant::prep_for_training() {}
 void training_assistant::prep_for_batch() {}

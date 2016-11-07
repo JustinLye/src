@@ -50,13 +50,24 @@ bool nn::process_raw_data(
 	return CS4793::loadDataFile(in, input_data, target_data, true_target, wrong_target);
 }
 
-bool nn::load_raw_data(std::istream& in, mat& raw_data) {
+bool nn::read_raw_data(std::istream& in, mat& raw_data) {
 	std::vector<std::vector<double> > input_vector;
 	if (!CS4793::readDataAsVecOfVecs(in, input_vector)) {
 		return false;
 	}
 	copy_from_stdvector(input_vector, raw_data);
 	return true;
+
+}
+
+bool nn::read_raw_data(const char* filename, mat& raw_data) {
+	bool result = false;
+	std::ifstream in;
+
+	in.open(filename);
+	result = read_raw_data(in, raw_data);
+	in.close();
+	return result;
 
 }
 

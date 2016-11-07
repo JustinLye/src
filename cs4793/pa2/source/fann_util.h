@@ -1,4 +1,4 @@
-
+#include<fstream>
 #include "pa_util.h"
 
 #if !defined(__NN_FANN_UTIL_HEADER__)
@@ -51,7 +51,8 @@ namespace nn {
 		double true_target = 0.9,
 		double wrong_target = 0.1);
 
-	bool load_raw_data(std::istream& in, mat& raw_data);
+	bool read_raw_data(std::istream& in, mat& raw_data);
+	bool read_raw_data(const char* filename, mat& raw_data);
 	void copy_from_stdvector(std::vector<std::vector<double> >& data_vector, mat& data_matrix);
 
 	namespace env {
