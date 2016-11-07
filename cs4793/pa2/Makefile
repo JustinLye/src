@@ -17,16 +17,26 @@ LDFlags += -lrt
 SOURCE_DIR = source/
 BIN_DIR = bin/
 
+
 all : fann
 
 fann: $(BIN_DIR)fann.o
-	$(CCX) $(CXXFlags) -o fann.exe $(BIN_DIR)fann.o $(BIN_DIR)fann_structs.o $(BIN_DIR)pa_util.o
+	$(CCX) $(CXXFlags) -o fann.exe $(BIN_DIR)fann.o $(BIN_DIR)fann_util.o $(BIN_DIR)pa_util.o
 
-$(BIN_DIR)fann.o: $(SOURCE_DIR)fann_test.cpp $(BIN_DIR)fann_structs.o $(BIN_DIR)pa_util.o
-	$(CCX) $(CXXFlags) -c $(SOURCE_DIR)fann_test.cpp $(BIN_DIR)fann_structs.o $(BIN_DIR)pa_util.o -o $(BIN_DIR)fann.o
+$(BIN_DIR)fann.o: $(SOURCE_DIR)fann_test.cpp $(BIN_DIR)fann_util.o $(BIN_DIR)pa_util.o
+	$(CCX) $(CXXFlags) -c $(SOURCE_DIR)fann_test.cpp $(BIN_DIR)fann_util.o $(BIN_DIR)pa_util.o -o $(BIN_DIR)fann.o
 
-$(BIN_DIR)fann_structs.o: $(SOURCE_DIR)fann_structs.cpp $(BIN_DIR)pa_util.o
-	$(CCX) $(CXXFlags) -c $(SOURCE_DIR)fann_structs.cpp $(BIN_DIR)pa_util.o -o $(BIN_DIR)fann_structs.o
+$(BIN_DIR)fann_util.o: $(SOURCE_DIR)fann_util.cpp $(SOURCE_DIR)fann_util.h $(BIN_DIR)pa_util.o
+	$(CCX) $(CXXFlags) -c $(SOURCE_DIR)fann_util.cpp $(BIN_DIR)pa_util.o -o $(BIN_DIR)fann_util.o
+
+#fann: $(BIN_DIR)fann.o
+#	$(CCX) $(CXXFlags) -o fann.exe $(BIN_DIR)fann.o $(BIN_DIR)fann_structs.o $(BIN_DIR)pa_util.o
+
+#$(BIN_DIR)fann.o: $(SOURCE_DIR)fann_test.cpp $(BIN_DIR)fann_structs.o $(BIN_DIR)pa_util.o
+#	$(CCX) $(CXXFlags) -c $(SOURCE_DIR)fann_test.cpp $(BIN_DIR)fann_structs.o $(BIN_DIR)pa_util.o -o $(BIN_DIR)fann.o
+
+#$(BIN_DIR)fann_structs.o: $(SOURCE_DIR)fann_structs.cpp $(BIN_DIR)pa_util.o
+#	$(CCX) $(CXXFlags) -c $(SOURCE_DIR)fann_structs.cpp $(BIN_DIR)pa_util.o -o $(BIN_DIR)fann_structs.o
 
 test: $(BIN_DIR)test.o 
 	$(CCX) $(CXXFlags) -o test.exe $(BIN_DIR)test.o $(BIN_DIR)noise.o $(BIN_DIR)net_layer_manager.o $(BIN_DIR)net_structs.o $(BIN_DIR)pa_util.o
