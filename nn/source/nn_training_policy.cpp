@@ -60,3 +60,52 @@ void nn::base_training_policy::print(std::ostream& s) const {
 	s << std::endl;
 	s << "\tReg Scale:\t" << policy.weight_reg_scaling << std::endl;
 }
+
+using namespace nn::encoder;
+
+const double training_policy::default_zero_out_pct = 0.40;
+const double training_policy::default_gauss_std_dev = 0.001;
+
+training_policy::training_policy() :
+	base_training_policy(),
+	_hidden_layer_dims(-1),
+	_noising_method(NN_GAUSSIAN_METHOD),
+	_noise_sigma(-1) {}
+
+training_policy::training_policy(const training_policy& copy_policy) :
+	base_training_policy(copy_policy),
+	_hidden_layer_dims(copy_policy._hidden_layer_dims),
+	_noising_method(copy_policy._noising_method),
+	_noise_sigma(copy_policy._noise_sigma) {}
+
+training_policy::training_policy(training_policy&& move_policy) :
+	base_training_policy(move_policy),
+	_hidden_layer_dims(std::move(move_policy._hidden_layer_dims)),
+	_noising_method(std::move(move_policy._noising_method)),
+	_noise_sigma(std::move(move_policy._noise_sigma)) {}
+
+training_policy::training_policy(const nn::training_policy_info& init_policy_info) :
+	base_training_policy(init_policy_info),
+	_hidden_layer_dims(-1),
+	_noising_method(NN_GAUSSIAN_METHOD),
+	_noise_sigma(-1) {}
+
+training_policy::training_policy(const nn::training_policy_info& init_policy_info, int init_hidden_dims, int noise_method) :
+	base_training_policy(init_policy_info),
+	_hidden_layer_dims(init_hidden_dims),
+	_noising_method(NN_GAUSSIAN_METHOD) {}
+
+void training_policy::print(std::ostream& s) const {
+	base_training_policy::print(s);
+	s << "\tHidden Dims:\t" << _hidden_layer_dims << std::endl;
+	s << "\tNoise Method:\t";
+	if (_noising_method == NN_GAUSSIAN_METHOD) {
+		s << "GAUSSIAN";
+	} else if (_noising_method == NN_ZERO_OUT_METHOD) {
+		s << "ZERO OUT";
+	} else {
+		s << "NOT RECOGNIZED";
+	}
+	s << std::endl;
+	s << "\tNoise Sigma:\t" << _noise_sigma << std::endl;
+}

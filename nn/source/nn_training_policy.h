@@ -2,6 +2,8 @@
 #if !defined(__NN_TRAINING_POLICY_HEADER__)
 #define __NN_TRAINING_POLICY_HEADER__
 
+#include "nn_util.h"
+
 namespace nn {
 
 	namespace default_training_policy {
@@ -74,6 +76,67 @@ namespace nn {
 	private:
 		//base_training_policy() = delete;
 	};
+
+	namespace encoder {
+		class training_policy : public nn::base_training_policy {
+		public:
+			//constructors
+			training_policy();
+			training_policy(const training_policy&);
+			training_policy(training_policy&&);
+			training_policy(const nn::training_policy_info&);
+			training_policy(const nn::training_policy_info&, int, int);
+
+			//current learning rate
+			double lrate;
+
+			//some default constants
+			static const double default_zero_out_pct;
+			static const double default_gauss_std_dev;
+
+			//getters
+			inline virtual int batch_size() const { return policy.batch_size; }
+			inline virtual int max_epoch() const { return policy.max_epoch; }
+			inline virtual double init_lrate() const { return policy.init_lrate; }
+			inline virtual bool update_lrate() const { return policy.update_lrate; }
+			inline virtual bool use_weight_reg() const { return policy.use_weight_reg; }
+			inline virtual double weight_reg_scaling() const { return policy.weight_reg_scaling; }
+			inline virtual int noising_method() const { return _noising_method; }
+			inline virtual int hidden_layer_dims() const { return _hidden_layer_dims; }
+			inline virtual double noise_sigma() const { return _noise_sigma; }
+			//setters
+			inline virtual void batch_size(int val) { policy.batch_size = val; }
+			inline virtual void max_epoch(int val) { policy.max_epoch = val; }
+			inline virtual void init_lrate(double val) { policy.init_lrate = val; }
+			inline virtual void update_lrate(bool val) { policy.update_lrate = val; }
+			inline virtual void use_weight_reg(bool val) { policy.use_weight_reg = val; }
+			inline virtual void weight_reg_scaling(double val) { policy.weight_reg_scaling = val; }
+			inline virtual void noising_method(int val) { _noising_method = val; }
+			inline virtual void hidden_layer_dims(int val) { _hidden_layer_dims = val; }
+			inline virtual void noise_sigma(double val) { _noise_sigma = val; }
+
+			training_policy& operator=(const training_policy& copy_policy) {
+				this->policy = copy_policy.policy;
+				this->_noising_method = copy_policy._noising_method;
+				this->_hidden_layer_dims = copy_policy._hidden_layer_dims;
+				this->_noise_sigma = copy_policy._noise_sigma;
+				return *this;
+			}
+
+			friend std::ostream& operator<<(std::ostream& s, const training_policy& p) {
+				p.print(s);
+				return s;
+			}
+
+		protected:
+			//training_policy_info policy;
+			int _noising_method;
+			int _hidden_layer_dims;
+			double _noise_sigma;
+			virtual void print(std::ostream& s) const;
+		};
+	};
+
 
 };
 
