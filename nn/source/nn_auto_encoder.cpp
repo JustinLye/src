@@ -114,11 +114,18 @@ void hidden_layer::randomize_weights() {
 	outgoing_links.randomize_weights();
 }
 
+//Sets the sample size min(input rows - rows_offset, batchsize). Performs feed forward, set error, backpropogate, and update links. Assumes any booking has been done. 
+void hidden_layer::training_step(int rows_offset) {
+	set_sample_size(rows_offset);
+	feed_forward(rows_offset);
+	set_errors(rows_offset);
+	back_propogate(rows_offset);
+	update_links();
+}
 
 //wanted to use topRows(sampleSize) as the example did, but poor planning forced me to use the block method or reorganize the my classes, which I have already done multiple times.
 
 void hidden_layer::feed_forward(int rows_offset) {
-	int sample_size = get_sample_size(rows_offset);
 
 	//forward to hidden layer then apply logistic sigmoid activation function to hidden layer
 	network_activation.block(rows_offset, 0, sample_size, network_activation.cols()) =
@@ -139,7 +146,6 @@ void hidden_layer::feed_forward(int rows_offset) {
 }
 
 void hidden_layer::set_errors(int rows_offset) {
-	int sample_size = get_sample_size(rows_offset);
 
 	//output layer errors
 	output_nodes->network_error.block(rows_offset, 0, sample_size, output_nodes->network_error.cols()) =
@@ -155,7 +161,6 @@ void hidden_layer::set_errors(int rows_offset) {
 }
 
 void hidden_layer::back_propogate(int rows_offset) {
-	int sample_size = get_sample_size(rows_offset);
 
 	//output layer
 	output_nodes->network_sensitivity.block(rows_offset, 0, sample_size, output_nodes->network_sensitivity.cols()) =
@@ -252,9 +257,76 @@ void hidden_layer::print_layer_status_errors(const char* additional_info) const 
 	}
 }
 
-training_assistant::training_assistant() {}
-training_assistant::training_assistant(const training_assistant& copy_assistant) {}
-training_assistant::training_assistant(training_assistant&& move_assistant) {}
+training_assistant::training_assistant() :
+	network(nullptr),
+	bpe(0),
+	row_offset(0) {}
+training_assistant::training_assistant(const training_assistant& copy_assistant) :
+	network(copy_assistant.network),
+	bpe(copy_assistant.bpe),
+	row_offset(copy_assistant.row_offset),
+	sample_indices(copy_assistant.sample_indices) {}
+
+training_assistant::training_assistant(training_assistant&& move_assistant) :
+	network(std::move(move_assistant.network)),
+	bpe(std::move(move_assistant.bpe)),
+	row_offset(std::move(move_assistant.row_offset)),
+	sample_indices(std::move(move_assistant.sample_indices)) {}
+
+
+void training_assistant::train() {
+	//initialize training environment
+	training_prep();
+	//train up-to maximum epochs stating in hidden_layer's (network) training policy
+	for (int i = 0; i < network->policy->max_epoch(); ++i) {
+		epoch();
+	}
+}
+
+void training_assistant::training_prep() {
+	//calculate batches per epoch
+	bpe = int(std::ceil(network->input_nodes->network_values.rows() / double(network->policy->batch_size())));
+	//clear indices vector
+	sample_indices.clear();
+	//resize index vector to fit number of input values
+	sample_indices.resize(network->input_nodes->network_values.rows());
+	//copy indices into vector
+	for (int i = 0; i < network->input_nodes->network_values.rows(); i++) {
+		sample_indices[i] = i;
+	}
+	//initialize weights and bais of incoming and outgoing links (hidden_layer input and output links)
+	network->randomize_weights();
+}
+
+void training_assistant::epoch_prep() {
+	//shuffle input value indices
+	std::random_shuffle(sample_indices.begin(), sample_indices.end());
+	//copy training inputs and targets in random order
+	for (int i = 0; i < network->noised_input.rows(); i++) {
+		network->training_inputs.row(i) = network->noised_input.row(sample_indices[i]);
+		network->training_targets.row(i) = network->targets.row(sample_indices[i]);
+	}
+}
+
+void training_assistant::epoch() {
+	//shuffle training inputs and targets
+	epoch_prep();
+	//train mini-batches up-to bpe
+	train_batches();
+	//todo: add early exit with validation testing
+}
+
+void training_assistant::train_batches() {
+	for (int i = 0; i < bpe; ++i) {
+		//resets delta accumulators
+		network->clear_delta();
+		//update row offset
+		row_offset = i * network->policy->batch_size();
+		//train mini-batch
+		network->training_step(row_offset);
+	}
+}
+
 
 
 

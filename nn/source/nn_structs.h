@@ -67,7 +67,7 @@ namespace nn {
 		//clears weights and bias delta accumulator
 		inline virtual void clear_delta() { weights_delta.setZero(); bias_delta.setZero(); }
 		//reset weights and bias to random values, then scale weight and bias elements by (1.0 / (1.0 + sqrt(weights.rows()))
-		inline virtual void randomize_weights() { weights.setRandom() *= (1.0 / (1.0 + sqrt(weights.rows()))); bias.setRandom() *= (1.0 / (1.0 + sqrt(bias.rows()))); }
+		inline virtual void randomize_weights() { weights.setRandom() *= (1.0 / (1.0 + sqrt(weights.rows()))); bias.setRandom() *= (1.0 / (1.0 + sqrt(weights.rows()))); }
 		//clears weights and bias
 		inline virtual void clear_info() { weights.setZero(), bias.setZero(); }
 		//resize matrix and vector members to appropriate dimensions. If incoming/outgoing dims are unknown, size(1,1) & size(1) are used by default

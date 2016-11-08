@@ -94,6 +94,7 @@ namespace nn {
 			virtual void clear_delta();
 			virtual void randomize_weights();
 
+			virtual void training_step(int=0);
 			virtual void feed_forward(int=0);
 			virtual void set_errors(int=0);
 			virtual void back_propogate(int=0);
@@ -109,10 +110,11 @@ namespace nn {
 			const training_policy* policy;
 		private:
 			nn::noise _noise_gen;
-
+			int sample_size;
 			//will be used during training step functions if there is a size conflict between the data and the batch size
-			inline int get_sample_size(int rows_offset) const {
-				return std::min(input_nodes->network_values.rows() - rows_offset, policy->batch_size());
+			inline void set_sample_size(int rows_offset) {
+				assert(input_nodes->network_values.rows() >= rows_offset);
+				sample_size = std::min(input_nodes->network_values.rows() - rows_offset, policy->batch_size());
 			}
 
 			inline bool all_flags_are_set() const {
@@ -150,13 +152,23 @@ namespace nn {
 
 			hidden_layer* network;
 
-			int bpe;
-
+			//driver function for training operations
 			virtual void train();
-			//this will calculate bpe. it will generate sample indices array.
+			//this will calculate bpe. it will generate sample indices array, and randomize hidden_layer links
+			//called once per training episode.
 			virtual void training_prep();
 			//this will shuffle the indice array and load the training_inputs and training_targets
+			//called before each epoch up-to max epoches
 			virtual void epoch_prep();
+			//calls epoch prep and train_batches
+			virtual void epoch();
+			//this will call mini_batch_prep(), updates row_offset then calls hidden_layer.train(rows_offset) --> hidden_layer.train is effectively a mini-batch.
+			//this is called bpe times per epoch
+			virtual void train_batches();
+		private:
+			int bpe;
+			int row_offset;
+			std::vector<int> sample_indices;
 		};
 
 
