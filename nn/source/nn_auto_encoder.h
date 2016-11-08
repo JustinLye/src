@@ -17,21 +17,7 @@ namespace nn {
 
 
 	namespace encoder {
-		
-		class enviro_status : public nn::env::base_enviro_status {
-		public:
-			enviro_status() : base_enviro_status() {}
-			enviro_status(const enviro_status& copy_status) : base_enviro_status(copy_status) {}
-			enviro_status(enviro_status&& move_status) : base_enviro_status(move_status) {}
-			enviro_status(int val) : nn::env::base_enviro_status(val) {}
-			inline int status() const { return _state; }
-			inline void status(int val) { _state = nn::env::set_status(val); }
-			inline bool ready_to_train() const { return _state == nn::env::ready; }
-			inline bool need_to_initialize() const { return _state == nn::env::uninitialized; }
-			inline bool in_error_state() const { return _state == nn::env::bad; }
-			inline bool policy_not_set() const { return (_state == nn::env::need_policy); }
-			//could add list of flags for potential errors (i.e. failed to load data from input stream)
-		};
+
 
 		class training_policy : public nn::base_training_policy {
 		public:
@@ -99,36 +85,24 @@ namespace nn {
 			hidden_layer(hidden_layer&&);
 			hidden_layer(input_layer*, output_layer*, const training_policy*);
 
+			mat training_inputs;
+			mat training_targets;
+			mat noised_input;
+			mat targets;
+
 			virtual void initialize();
-			virtual void training_step(int rows_offset) {
-				if (!can_train()) {
-					print_layer_status_errors("hidden_layer training step was not performed.");
-					throw std::runtime_error("error: attempt to peform hidden_layer training step failed");
-				}
-				feed_forward(rows_offset);
-				back_propogate(rows_offset);
-				set_errors(rows_offset);
-				update_links();
-			}
-
-
-
-			//TODO: will need to use block instead of topRows()!!!!
-			//training_step helper functions for batch training
-			//todo: move training_step functions to protected or private section
-			virtual void feed_forward(int = 0);
-			virtual void back_propogate(int = 0);
-			virtual void set_errors(int = 0);
-			inline virtual void update_links() {
-				incoming_links.update();
-				outgoing_links.update();
-			}
-
-			//clean-up helper functions for batch training
 			virtual void clear_delta();
 			virtual void randomize_weights();
 
-			//status functions 
+			virtual void feed_forward(int=0);
+			virtual void set_errors(int=0);
+			virtual void back_propogate(int=0);
+			virtual inline void update_links() {
+				incoming_links.update();
+				outgoing_links.update();
+			}
+			
+
 			inline bool is_complete() const { return (input_nodes != nullptr && output_nodes != nullptr && policy != nullptr); }
 			inline bool can_train() const { return (is_complete() && all_flags_are_set()); }
 			mat noised_input;
@@ -174,6 +148,15 @@ namespace nn {
 			training_assistant(const training_assistant&);
 			training_assistant(training_assistant&&);
 
+			hidden_layer* network;
+
+			int bpe;
+
+			virtual void train();
+			//this will calculate bpe. it will generate sample indices array.
+			virtual void training_prep();
+			//this will shuffle the indice array and load the training_inputs and training_targets
+			virtual void epoch_prep();
 		};
 
 

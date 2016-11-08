@@ -115,37 +115,26 @@ void hidden_layer::randomize_weights() {
 }
 
 
+//wanted to use topRows(sampleSize) as the example did, but poor planning forced me to use the block method or reorganize the my classes, which I have already done multiple times.
+
 void hidden_layer::feed_forward(int rows_offset) {
 	int sample_size = get_sample_size(rows_offset);
 
-	//forward to hidden layer
-	//network_values.topRows(sample_size) = (input_nodes->network_values.topRows(sample_size) * incoming_links.weights).rowwise() + incoming_links.bias;
 	//forward to hidden layer then apply logistic sigmoid activation function to hidden layer
-	network_activation.topRows(sample_size) = 1.0 / (Eigen::exp(((noised_input.topRows(sample_size) * incoming_links.weights).rowwise() + incoming_links.bias).array() * -1.0) + 1.0);
+	network_activation.block(rows_offset, 0, sample_size, network_activation.cols()) =
+		1.0 / (Eigen::exp(((training_inputs.block(rows_offset, 0, sample_size, training_inputs.cols()) * incoming_links.weights).rowwise() + incoming_links.bias).array() * -1.0) + 1.0);
+	
 	//store first derivative
-	network_activation_prime.topRows(sample_size) = network_activation_prime.topRows(sample_size).array() * (1.0 - network_activation_prime.topRows(sample_size).array());
+	network_activation_prime.block(rows_offset, 0, sample_size, network_activation_prime.cols()) =
+		network_activation_prime.block(rows_offset, 0, sample_size, network_activation_prime.cols()).array() * (1.0 - network_activation_prime.block(rows_offset, 0, sample_size, network_activation_prime.cols()).array());
 
-	//forward to output layer then apply logistic sigmoid activation function to hidden layer
-	output_nodes->network_activation.topRows(sample_size) = 1.0 / (Eigen::exp(((network_activation.topRows(sample_size) * outgoing_links.weights).rowwise() + outgoing_links.bias).array() * -1.0)*-1.0);
-	//sort first derivative
-	output_nodes->network_activation_prime.topRows(sample_size) = output_nodes->network_activation_prime.topRows(sample_size).array() * (1.0 - output_nodes->network_activation_prime.topRows(sample_size).array());
-}
-void hidden_layer::back_propogate(int rows_offset) {
-	int sample_size = get_sample_size(rows_offset);
+	//forward to output layer then apply logistic sigmoid activation function to output layer
+	output_nodes->network_activation.block(rows_offset, 0, sample_size, output_nodes->network_activation.cols()) =
+		1.0 / (Eigen::exp(((network_activation.block(rows_offset, 0, sample_size, network_activation.cols()) * outgoing_links.weights).rowwise() + outgoing_links.bias).array() * -1.0) + 1.0);
 
-	// output layer
-	output_nodes->network_sensitivity.topRows(sample_size) = output_nodes->network_error.topRows(sample_size).array() * output_nodes->network_activation_prime.topRows(sample_size).array();
-	// not sure why we are dividing the sensitivity by the sample size
-	outgoing_links.weights_delta += policy->lrate * network_activation.topRows(sample_size).transpose() * output_nodes->network_sensitivity.topRows(sample_size) / sample_size;
-	// not sure why the bias is propogated this while or why we are dividing the sensitivity by the sample size
-	outgoing_links.bias_delta += policy->lrate * output_nodes->network_sensitivity.topRows(sample_size).colwise().sum()/sample_size;
-
-	// todo: add sparsity error term to hidden layer sensitivity
-
-	// add the propogation of the outer layers delta's
-	network_sensitivity.topRows(sample_size) = (output_nodes->network_sensitivity.topRows(sample_size) * outgoing_links.weights.transpose()).array() * network_activation_prime.topRows(sample_size).array();
-	incoming_links.weights_delta.topRows(sample_size) += policy->lrate * input_nodes->network_values.topRows(sample_size).transpose() * network_sensitivity.topRows(sample_size) / sample_size;
-	incoming_links.bias_delta.topRows(sample_size) += policy->lrate * network_sensitivity.topRows(sample_size).colwise().sum() / sample_size;
+	//store first derivative
+	output_nodes->network_activation_prime.block(rows_offset, 0, sample_size, output_nodes->network_activation_prime.cols()) =
+		output_nodes->network_activation_prime.block(rows_offset, 0, sample_size, output_nodes->network_activation_prime.cols()).array() * (1.0 - output_nodes->network_activation_prime.block(rows_offset, 0, sample_size, output_nodes->network_activation_prime.cols()).array());
 
 }
 
@@ -153,7 +142,8 @@ void hidden_layer::set_errors(int rows_offset) {
 	int sample_size = get_sample_size(rows_offset);
 
 	//output layer errors
-	output_nodes->network_error.topRows(sample_size) = output_nodes->network_targets.topRows(sample_size) - output_nodes->network_activation.topRows(sample_size);
+	output_nodes->network_error.block(rows_offset, 0, sample_size, output_nodes->network_error.cols()) =
+		training_targets.block(rows_offset, 0, sample_size, training_targets.cols()) - output_nodes->network_activation.block(rows_offset, 0, sample_size, output_nodes->network_activation.cols());
 
 	//todo: apply sparsity error
 
@@ -162,6 +152,28 @@ void hidden_layer::set_errors(int rows_offset) {
 		incoming_links.weights_delta = incoming_links.weights * (-1.0 * policy->weight_reg_scaling());
 		outgoing_links.weights_delta = outgoing_links.weights * (-1.0 * policy->weight_reg_scaling());
 	}
+}
+
+void hidden_layer::back_propogate(int rows_offset) {
+	int sample_size = get_sample_size(rows_offset);
+
+	//output layer
+	output_nodes->network_sensitivity.block(rows_offset, 0, sample_size, output_nodes->network_sensitivity.cols()) =
+		output_nodes->network_error.block(rows_offset, 0, sample_size, output_nodes->network_error.cols()).array() * output_nodes->network_activation_prime.block(rows_offset, 0, sample_size, output_nodes->network_activation_prime.cols()).array();
+	outgoing_links.weights_delta +=
+		policy->lrate * network_activation.block(rows_offset, 0, sample_size, network_activation.cols()).transpose() * output_nodes->network_sensitivity.block(rows_offset, 0, sample_size, output_nodes->network_sensitivity.cols()) / sample_size;
+	outgoing_links.bias_delta +=
+		policy->lrate * output_nodes->network_sensitivity.block(rows_offset, 0, sample_size, output_nodes->network_sensitivity.cols()).colwise().sum() / sample_size;
+
+	//todo: add sparsity error term to hidden layer sensitivity
+
+	//add the propogation to the incoming links delta's
+	network_sensitivity.block(rows_offset, 0, sample_size, network_sensitivity.cols()) =
+		(output_nodes->network_sensitivity.block(rows_offset, 0, sample_size, output_nodes->network_sensitivity.cols()) * outgoing_links.weights.transpose()).array() * network_sensitivity.block(rows_offset, 0, sample_size, network_sensitivity.cols()).array();
+	incoming_links.weights_delta +=
+		policy->lrate * training_inputs.block(rows_offset, 0, sample_size, training_inputs.cols()).transpose() * network_sensitivity.block(rows_offset, 0, sample_size, network_sensitivity.cols()) / sample_size;
+	incoming_links.bias_delta +=
+		policy->lrate * network_sensitivity.block(rows_offset, 0, sample_size, network_sensitivity.cols()).colwise().sum() / sample_size;
 }
 
 
@@ -192,8 +204,8 @@ void hidden_layer::add_noise() {
 void hidden_layer::set_target() {
 	has_targets_flag = false;
 	if (is_complete()) {
-		output_nodes->network_targets.resize(input_nodes->network_values.rows(), input_nodes->network_values.cols());
-		output_nodes->network_targets = input_nodes->network_values;
+		training_targets.resize(input_nodes->network_values.rows(), input_nodes->network_values.cols());
+		training_targets = input_nodes->network_values;
 		has_targets_flag = true;
 	}
 }

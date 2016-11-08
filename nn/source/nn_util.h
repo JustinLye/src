@@ -54,32 +54,6 @@ namespace nn {
 	bool read_raw_data(std::istream& in, mat& raw_data);
 	bool read_raw_data(const char* filename, mat& raw_data);
 	void copy_from_stdvector(std::vector<std::vector<double> >& data_vector, mat& data_matrix);
-
-	namespace env {
-		static const int ready = NN_ENVRIO_STATUS_READY;
-		static const int bad = NN_EVIRIO_STATUS_BAD;
-		static const int uninitialized = NN_EVIRIO_STATUS_UNINITIALIZED;
-		static const int need_policy = NN_ENVIRO_STATUS_POLICY_NOT_SET;
-
-		static bool vaild_status(int val) { return (NN_ENVIRO_STATUS_START < val && NN_ENVIRO_STATUS_END > val); }
-		static int set_status(int val) { if (vaild_status(val)) return val; else return NN_ENVIRO_STATUS_INVAILD; }
-		class base_enviro_status {
-		public:
-			base_enviro_status() : _state(set_status(-1)) {}
-			base_enviro_status(const base_enviro_status& copy_status) : _state(set_status(copy_status._state)) {}
-			base_enviro_status(base_enviro_status&& move_status) : _state(std::move(move_status._state)) { _state = set_status(_state); }
-
-
-			base_enviro_status(int init_status) : _state(set_status(init_status)) {}
-			virtual int status() const = 0;
-			virtual void status(int) = 0;
-			bool operator==(int val) { return (val == _state); }
-			bool operator!=(int val) { return (val != _state); }
-			bool operator==(const base_enviro_status& val) { return (val._state == _state); }
-			bool operator!=(const base_enviro_status& val) { return (val._state != _state); }
-		protected:
-			int _state;
-		};
 	};
 };
 
