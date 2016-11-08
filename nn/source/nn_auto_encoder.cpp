@@ -121,7 +121,7 @@ void hidden_layer::feed_forward(int rows_offset) {
 	//forward to hidden layer
 	//network_values.topRows(sample_size) = (input_nodes->network_values.topRows(sample_size) * incoming_links.weights).rowwise() + incoming_links.bias;
 	//forward to hidden layer then apply logistic sigmoid activation function to hidden layer
-	network_activation.topRows(sample_size) = 1.0 / (Eigen::exp(((input_nodes->network_values.topRows(sample_size) * incoming_links.weights).rowwise() + incoming_links.bias).array() * -1.0) + 1.0);
+	network_activation.topRows(sample_size) = 1.0 / (Eigen::exp(((noised_input.topRows(sample_size) * incoming_links.weights).rowwise() + incoming_links.bias).array() * -1.0) + 1.0);
 	//store first derivative
 	network_activation_prime.topRows(sample_size) = network_activation_prime.topRows(sample_size).array() * (1.0 - network_activation_prime.topRows(sample_size).array());
 
@@ -240,17 +240,11 @@ void hidden_layer::print_layer_status_errors(const char* additional_info) const 
 	}
 }
 
-training_assistant::training_assistant() :
-	network(nullptr) {}
+training_assistant::training_assistant() {}
 training_assistant::training_assistant(const training_assistant& copy_assistant) {}
 training_assistant::training_assistant(training_assistant&& move_assistant) {}
 
-void training_assistant::train() {}
-void training_assistant::prep_for_training() {}
-void training_assistant::prep_for_batch() {}
-void training_assistant::training_step() {}
-void training_assistant::initialize_delta_accumulators() {}
-void training_assistant::randomize_weights() {}
+
 
 
 auto_encoder::auto_encoder() {}

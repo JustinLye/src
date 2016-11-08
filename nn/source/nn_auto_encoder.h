@@ -111,6 +111,9 @@ namespace nn {
 				update_links();
 			}
 
+
+
+			//TODO: will need to use block instead of topRows()!!!!
 			//training_step helper functions for batch training
 			//todo: move training_step functions to protected or private section
 			virtual void feed_forward(int = 0);
@@ -127,16 +130,19 @@ namespace nn {
 
 			//status functions 
 			inline bool is_complete() const { return (input_nodes != nullptr && output_nodes != nullptr && policy != nullptr); }
-			inline bool can_train() const { return (is_complete() && has_noise_flag && has_targets_flag && dim_links_flag); }
-
-		private:
-			const training_policy* policy;
+			inline bool can_train() const { return (is_complete() && all_flags_are_set()); }
 			mat noised_input;
+			const training_policy* policy;
+		private:
 			nn::noise _noise_gen;
 
 			//will be used during training step functions if there is a size conflict between the data and the batch size
 			inline int get_sample_size(int rows_offset) const {
 				return std::min(input_nodes->network_values.rows() - rows_offset, policy->batch_size());
+			}
+
+			inline bool all_flags_are_set() const {
+				return (has_noise_flag && has_targets_flag && dim_links_flag);
 			}
 
 			//flags
@@ -153,7 +159,8 @@ namespace nn {
 			virtual void print_layer_status_errors(const char* = nullptr) const;
 
 			//inaccessible members
-
+			virtual void feed_forward() {}
+			virtual void back_propogate() {}
 			hidden_layer(mat&) = delete;
 			hidden_layer(int, int) = delete;
 			hidden_layer(input_layer*, output_layer*) = delete;
@@ -167,18 +174,6 @@ namespace nn {
 			training_assistant(const training_assistant&);
 			training_assistant(training_assistant&&);
 
-			hidden_layer* network;
-
-			virtual void train();
-			virtual void prep_for_training();
-			virtual void prep_for_batch();
-
-			//will call hidden_layer feed_forward and back_propogate methods using policy batch size as argument
-			virtual void training_step();
-		protected:
-			//helper function to reset minibatch deltas
-			virtual void initialize_delta_accumulators();
-			virtual void randomize_weights();
 		};
 
 
