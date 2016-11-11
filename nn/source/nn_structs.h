@@ -45,13 +45,13 @@ namespace nn {
 		layer_link(int);
 		layer_link(int, int);
 		layer_link(mat&);
-		layer_link(mat&, vec&);
+		layer_link(mat&, row_vec&);
 
 		//public members
 		mat weights;
-		vec bias;
+		row_vec bias;
 		mat weights_delta;
-		vec bias_delta;
+		row_vec bias_delta;
 
 		//getters
 		inline virtual int incoming_dims() const { return weights.rows(); }

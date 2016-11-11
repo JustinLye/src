@@ -1,68 +1,76 @@
-
-#include<Eigen/Core>
 #include<iostream>
-#include<stdexcept>
-#if !defined(__NN_AUTO_ENCODER_HEADER__)
-#define __NN_AUTO_ENCODER_HEADER__
+#include<random>
+#include<time.h>
 
-#include "nn_hidden_layer.h"
+#if !defined(__NN_ENCODER_HEADER__)
+#define __NN_ENCODER_HEADER__
 
-
-/*notes:
-	code use a lot of error handling; however, this project is overdue. hopefully these class objects can be reused in semester project.
-*/
+#include"nn_util.h"
+#include"noise.h"
 
 namespace nn {
-	namespace encoder {
-		//could have a class to do general training cleanup and initialization
-		class training_assistant {
-		public:
-			training_assistant();
-			training_assistant(const training_assistant&);
-			training_assistant(training_assistant&&);
-
-			encoding_layer* encoder;
-
-			//driver function for training operations
-			virtual void train();
-			//this will calculate bpe. it will generate sample indices array, and randomize hidden_layer links
-			//called once per training episode.
-			virtual void training_prep();
-			//this will shuffle the indice array and load the training_inputs and training_targets
-			//called before each epoch up-to max epoches
-			virtual void epoch_prep();
-			//calls epoch prep and train_batches
-			virtual void epoch();
-			//this will call mini_batch_prep(), updates row_offset then calls hidden_layer.train(rows_offset) --> hidden_layer.train is effectively a mini-batch.
-			//this is called bpe times per epoch
-			virtual void train_batches();
-		private:
-			int bpe;
-			int row_offset;
-			std::vector<int> sample_indices;
-		};
-		class auto_encoder {
-		public:
-			auto_encoder();
-			auto_encoder(const char*);
-			~auto_encoder() {
-				if (_hidden != nullptr) {
-					delete _hidden;
-				}
-			}
-
-			virtual void set_policy(const training_policy&);
-
-			inline bool train() {
-			}
-		public:
-			input_layer _input;
-			output_layer _output;
-			encoding_layer* _hidden;
-			training_policy _policy;
-			training_assistant _trainer;
-		};
+	struct layer_nodes {
+		mat network;
+		mat output;
+		mat oprime;
+		mat error;
+		mat target;
+		mat sensitivity;
+		int rows;
+		int dims;
+		const char* name;
 	};
+
+	struct layer_links {
+		mat weights;
+		row_vec bias;
+		mat weights_delta;
+		row_vec bias_delta;
+		int indims;
+		int outdims;
+		const char* name;
+	};
+	typedef layer_nodes ln;
+	typedef layer_links ll;
+
+	class encoder {
+	public:
+		ln in_layer;
+		ln out_layer;
+		ln hidden_layer;
+		ll in_links;
+		ll out_links;
+		mat raw_data;
+		mat orig_data;
+		noise noise_maker;
+		int examples;
+		int features;
+		int hdims;
+		double srate;
+		double n_srate;
+		double lrate;
+		double init_lrate;
+		double batchsize;
+		int max_epoch;
+		int epoch;
+		double beta;
+
+		void clear_accumulators();
+		void initialize(int hdims, const char* filename);
+
+protected:
+	void zero_out(ln& n);
+	void zero_out(ll& l);
+	void resize(ln& n, int r, int d);
+	void resize(ll& l, int i, int o);
+	void randomize(ll& l);
+	void clear_accumulators(ln& n);
+	void clear_accumulators(ll& l);
+
+
+
+
 };
+
 
 #endif

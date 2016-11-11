@@ -8,6 +8,7 @@
 
 namespace nn {
 	namespace encoder {
+
 		class encoding_layer : public nn::base_hidden_layer {
 		public:
 			//constructors
@@ -20,9 +21,12 @@ namespace nn {
 			mat training_targets;
 			mat noised_input;
 			mat targets;
+			col_vec hmean;
+			col_vec kldiv;
+			const training_policy* policy;
 
 			virtual void initialize();
-			virtual void clear_delta();
+			virtual void clear_delta_accumulator();
 			virtual void randomize_weights();
 
 			virtual void training_step(int = 0);
@@ -33,19 +37,21 @@ namespace nn {
 				incoming_links.update();
 				outgoing_links.update();
 			}
-
+			virtual void set_hmean(int = 0);
+			virtual void set_kldiv(int = 0);
+			virtual void set_sparsity_penalty(int = 0);
 
 			inline bool is_complete() const { return (input_nodes != nullptr && output_nodes != nullptr && policy != nullptr); }
 			inline bool can_train() const { return (is_complete() && all_flags_are_set()); }
-			mat noised_input;
-			const training_policy* policy;
+			
 		private:
 			nn::noise _noise_gen;
 			int sample_size;
 			//will be used during training step functions if there is a size conflict between the data and the batch size
 			inline void set_sample_size(int rows_offset) {
-				assert(input_nodes->network_values.rows() >= rows_offset);
-				sample_size = std::min(input_nodes->network_values.rows() - rows_offset, policy->batch_size());
+				//assert(input_nodes->network_values.rows() >= rows_offset);
+				int rows = static_cast<int>(input_nodes->network_values.rows());
+				sample_size = std::min(rows - rows_offset, policy->batch_size());
 			}
 
 			inline bool all_flags_are_set() const {
@@ -56,11 +62,12 @@ namespace nn {
 			bool has_noise_flag;
 			bool has_targets_flag;
 			bool dim_links_flag;
-
+			bool is_sparse_flag;
 			//initialization helper functions
 			virtual void add_noise();
 			virtual void set_target();
 			virtual void dim_links();
+			virtual void chk_sparse();
 
 			virtual void print_layer_status_warnings(const char* = nullptr) const;
 			virtual void print_layer_status_errors(const char* = nullptr) const;

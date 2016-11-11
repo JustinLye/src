@@ -85,7 +85,7 @@ namespace nn {
 			training_policy(const training_policy&);
 			training_policy(training_policy&&);
 			training_policy(const nn::training_policy_info&);
-			training_policy(const nn::training_policy_info&, int, int);
+			training_policy(const nn::training_policy_info&, int, int, double, double);
 
 			//current learning rate
 			double lrate;
@@ -104,6 +104,9 @@ namespace nn {
 			inline virtual int noising_method() const { return _noising_method; }
 			inline virtual int hidden_layer_dims() const { return _hidden_layer_dims; }
 			inline virtual double noise_sigma() const { return _noise_sigma; }
+			inline virtual double sparsity_rate() const { return _sparsity_rate; }
+			inline virtual double beta() const { return _beta; }
+
 			//setters
 			inline virtual void batch_size(int val) { policy.batch_size = val; }
 			inline virtual void max_epoch(int val) { policy.max_epoch = val; }
@@ -114,12 +117,15 @@ namespace nn {
 			inline virtual void noising_method(int val) { _noising_method = val; }
 			inline virtual void hidden_layer_dims(int val) { _hidden_layer_dims = val; }
 			inline virtual void noise_sigma(double val) { _noise_sigma = val; }
+			inline virtual void sparsity_rate(double val) { _sparsity_rate = val; }
+			inline virtual void beta(double val) { _beta = val; }
 
 			training_policy& operator=(const training_policy& copy_policy) {
 				this->policy = copy_policy.policy;
 				this->_noising_method = copy_policy._noising_method;
 				this->_hidden_layer_dims = copy_policy._hidden_layer_dims;
 				this->_noise_sigma = copy_policy._noise_sigma;
+				this->_sparsity_rate = copy_policy._sparsity_rate;
 				return *this;
 			}
 
@@ -133,6 +139,8 @@ namespace nn {
 			int _noising_method;
 			int _hidden_layer_dims;
 			double _noise_sigma;
+			double _sparsity_rate;
+			double _beta;
 			virtual void print(std::ostream& s) const;
 		};
 	};

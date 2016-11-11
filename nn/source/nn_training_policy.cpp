@@ -70,30 +70,40 @@ training_policy::training_policy() :
 	base_training_policy(),
 	_hidden_layer_dims(-1),
 	_noising_method(NN_GAUSSIAN_METHOD),
-	_noise_sigma(-1) {}
+	_noise_sigma(-1),
+	_sparsity_rate(-1),
+	_beta(0.5) {}
 
 training_policy::training_policy(const training_policy& copy_policy) :
 	base_training_policy(copy_policy),
 	_hidden_layer_dims(copy_policy._hidden_layer_dims),
 	_noising_method(copy_policy._noising_method),
-	_noise_sigma(copy_policy._noise_sigma) {}
+	_noise_sigma(copy_policy._noise_sigma),
+	_sparsity_rate(copy_policy._sparsity_rate),
+	_beta(copy_policy._beta) {}
 
 training_policy::training_policy(training_policy&& move_policy) :
 	base_training_policy(move_policy),
 	_hidden_layer_dims(std::move(move_policy._hidden_layer_dims)),
 	_noising_method(std::move(move_policy._noising_method)),
-	_noise_sigma(std::move(move_policy._noise_sigma)) {}
+	_noise_sigma(std::move(move_policy._noise_sigma)),
+	_sparsity_rate(std::move(move_policy._sparsity_rate)),
+	_beta(std::move(move_policy._beta)) {}
 
 training_policy::training_policy(const nn::training_policy_info& init_policy_info) :
 	base_training_policy(init_policy_info),
 	_hidden_layer_dims(-1),
 	_noising_method(NN_GAUSSIAN_METHOD),
-	_noise_sigma(-1) {}
+	_noise_sigma(-1),
+	_sparsity_rate(-1),
+	_beta(0.5) {}
 
-training_policy::training_policy(const nn::training_policy_info& init_policy_info, int init_hidden_dims, int noise_method) :
+training_policy::training_policy(const nn::training_policy_info& init_policy_info, int init_hidden_dims, int noise_method, double init_sparsity_rate, double init_beta) :
 	base_training_policy(init_policy_info),
 	_hidden_layer_dims(init_hidden_dims),
-	_noising_method(NN_GAUSSIAN_METHOD) {}
+	_noising_method(NN_GAUSSIAN_METHOD),
+	_sparsity_rate(init_sparsity_rate),
+	_beta(init_beta) {}
 
 void training_policy::print(std::ostream& s) const {
 	base_training_policy::print(s);
@@ -108,4 +118,6 @@ void training_policy::print(std::ostream& s) const {
 	}
 	s << std::endl;
 	s << "\tNoise Sigma:\t" << _noise_sigma << std::endl;
+	s << "\tSparsity Rate:\t" << _sparsity_rate << std::endl;
+	s << "\tBeta (sparsity):\t" << _beta << std::endl;
 }

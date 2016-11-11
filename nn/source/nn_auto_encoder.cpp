@@ -1,89 +1,157 @@
-#include "nn_auto_encoder.h"
+#include"nn_auto_encoder.h"
 
-using namespace nn::encoder;
-training_assistant::training_assistant() :
-	encoder(nullptr),
-	bpe(0),
-	row_offset(0) {}
-training_assistant::training_assistant(const training_assistant& copy_assistant) :
-	encoder(copy_assistant.encoder),
-	bpe(copy_assistant.bpe),
-	row_offset(copy_assistant.row_offset),
-	sample_indices(copy_assistant.sample_indices) {}
+namespace nn {
+	struct layer_nodes {
+		mat network;
+		mat output;
+		mat oprime;
+		mat error;
+		mat target;
+		mat sensitivity;
+		int rows;
+		int dims;
+		const char* name;
+	};
 
-training_assistant::training_assistant(training_assistant&& move_assistant) :
-	encoder(std::move(move_assistant.encoder)),
-	bpe(std::move(move_assistant.bpe)),
-	row_offset(std::move(move_assistant.row_offset)),
-	sample_indices(std::move(move_assistant.sample_indices)) {}
+	struct layer_links {
+		mat weights;
+		row_vec bias;
+		mat weights_delta;
+		row_vec bias_delta;
+		int indims;
+		int outdims;
+		const char* name;
+	};
+	typedef layer_nodes ln;
+	typedef layer_links ll;
 
+	class encoder {
+	public:
+		ln in_layer;
+		ln out_layer;
+		ln hidden_layer;
+		ll in_links;
+		ll out_links;
+		mat raw_data;
+		mat orig_data;
+		noise noise_maker;
+		int examples;
+		int features;
+		int hdims;
+		double srate;
+		double n_srate;
+		double lrate;
+		double init_lrate;
+		double batchsize;
+		int max_epoch;
+		int epoch;
+		double beta;
 
-void training_assistant::train() {
-	//initialize training environment
-	training_prep();
-	//train up-to maximum epochs stating in hidden_layer's (network) training policy
-	for (int i = 0; i < encoder->policy->max_epoch(); ++i) {
-		epoch();
+		void clear_accumulators() {
+			clear_accumulators(in_layer);
+			clear_accumulators(out_layer);
+			clear_accumulators(hidden_layer);
+			clear_accumulators(in_links);
+			clear_accumulators(out_links);
+		}
+
+		void initialize(int hdims, const char* filename) {
+
+			//read input, store in encoder raw_data member
+			nn::read_raw_data(filename, raw_data);
+
+			//set encoder examples to raw data rows
+			examples = raw_data.rows();
+			//input dims = input cols - 1
+			features = raw_data.cols() - 1;
+			hdims = hdims;
+
+			//resize storage
+			resize(in_layer, examples, features);
+			resize(out_layer, examples, features);
+			resize(hidden_layer, examples, features);
+			resize(in_links, features, hdims);
+			resize(out_links, hdims, features);
+			//input data = raw input data
+			orig_data = raw_data.block(0, 1, examples, features);
+			//target data = raw input data
+			out_layer.target = orig_data;
+			//seed standard random num gen
+			srand(time(NULL));
+
+			//randomize wieights
+			randomize(in_links);
+			randomize(out_links);
+
+			srate = 1.0 / double(hdims);
+			n_srate = 1.0 - srate;
+			in_layer.name = "Input Layer";
+			out_layer.name = "Output Layer";
+			hidden_layer.name = "Hidden Layer";
+			in_links.name = "Incoming Links";
+			out_links.name = "Output Links";
+		}
+
+	};
+
+protected:
+	void zero_out(ln& n) {
+		n.network.setZero();
+		n.output.setZero();
+		n.oprime.setZero();
+		n.error.setZero();
+		n.target.setZero();
+		n.sensitivity.setZero();
 	}
-}
 
-void training_assistant::training_prep() {
-	//calculate batches per epoch
-	bpe = int(std::ceil(encoder->input_nodes->network_values.rows() / double(encoder->policy->batch_size())));
-	//clear indices vector
-	sample_indices.clear();
-	//resize index vector to fit number of input values
-	sample_indices.resize(encoder->input_nodes->network_values.rows());
-	//copy indices into vector
-	for (int i = 0; i < encoder->input_nodes->network_values.rows(); i++) {
-		sample_indices[i] = i;
+
+	void zero_out(ll& l) {
+		l.weights_delta.setZero();
+		l.bias.setZero();
+		l.weights_delta.setZero();
+		l.bias_delta.setZero();
 	}
-	//initialize weights and bais of incoming and outgoing links (hidden_layer input and output links)
-	encoder->randomize_weights();
-}
 
-void training_assistant::epoch_prep() {
-	//shuffle input value indices
-	std::random_shuffle(sample_indices.begin(), sample_indices.end());
-	//copy training inputs and targets in random order
-	for (int i = 0; i < encoder->noised_input.rows(); i++) {
-		encoder->training_inputs.row(i) = encoder->noised_input.row(sample_indices[i]);
-		encoder->training_targets.row(i) = encoder->targets.row(sample_indices[i]);
+	void resize(ln& n, int r, int d) {
+		n.network.resize(r, d);
+		n.output.resize(r, d);
+		n.oprime.resize(r, d);
+		n.error.resize(r, d);
+		n.target.resize(r, d);
+		n.sensitivity.resize(r, d);
+		n.rows = r;
+		n.dims = d;
+		zero_out(n);
 	}
-}
 
-void training_assistant::epoch() {
-	//shuffle training inputs and targets
-	epoch_prep();
-	//train mini-batches up-to bpe
-	train_batches();
-	//todo: add early exit with validation testing
-}
-
-void training_assistant::train_batches() {
-	for (int i = 0; i < bpe; ++i) {
-		//resets delta accumulators
-		encoder->clear_delta();
-		//update row offset
-		row_offset = i * encoder->policy->batch_size();
-		//train mini-batch
-		encoder->training_step(row_offset);
+	void resize(ll& l, int i, int o) {
+		l.weights.resize(i, o);
+		l.bias.resize(o);
+		l.weights_delta.resize(i, o);
+		l.bias_delta.resize(o);
+		l.indims = i;
+		l.outdims = o;
+		zero_out(l);
 	}
-}
 
-auto_encoder::auto_encoder() {}
-auto_encoder::auto_encoder(const char* filename) :
-	_input(filename),
-	_output(_input.network_values.rows(), _input.network_values.cols()),
-	_hidden(nullptr),
-	_policy(training_policy()),
-	_trainer(training_assistant()) {}
+	void randomize(ll& l) {
+		l.weights.setRandom();
+		l.bias.setRandom();
+	}
+
+	void clear_accumulators(ln& n) {
+		n.sensitivity.setZero();
+	}
+
+	void clear_accumulators(ll& l) {
+		l.weights_delta.setZero();
+		l.bias_delta.setZero();
+	}
 
 
-//copies policy
-void auto_encoder::set_policy(const training_policy& init_policy) {
-	_policy = init_policy;
-	_hidden = new encoding_layer(&_input, &_output, &_policy);
-	_trainer.encoder = _hidden;
 
-}
+
+};
+
+
+#endif

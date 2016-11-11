@@ -84,8 +84,11 @@ nn::output_layer::output_layer(int data_rows, int output_dims) :
 	network_targets(data_rows, output_dims) {}
 
 void nn::output_layer::clear_delta() {
+	
 	network_error.setZero();
+	
 	network_sensitivity.setZero();
+	
 }
 
 
@@ -141,7 +144,7 @@ nn::layer_link::layer_link(mat& init_weights) :
 	weights_delta(init_weights.rows(), init_weights.cols()),
 	bias_delta(init_weights.cols()) {}
 
-nn::layer_link::layer_link(mat& init_weights, vec& init_bias) :
+nn::layer_link::layer_link(mat& init_weights, row_vec& init_bias) :
 	weights(init_weights),
 	bias(init_bias),
 	weights_delta(init_weights.rows(), init_weights.cols()),
