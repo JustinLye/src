@@ -8,17 +8,15 @@
 ds::Array<int> keys = { 10, 22, 31, 4, 15, 28, 17, 88, 59 };
 const char* q1_output = "CS4343 - HW6 - Q2.txt";
 
-int h(int);
-int m = 7;
+int h(int,int);
 
 int main(int argc, char* argv[]) {
-	
-	ds::hash::chaining::hash_table c(m,h);
-	
+	ds::hash_table::chained l(7);
+	std::cout << l << std::endl;
 	for (int i = 0; i < keys.length(); i++) {
-		c.hash_insert(keys[i]);
+		l.hash_insert(keys[i]);
 	}
-	std::cout << c;
+	std::cout << l << std::endl;
 	return 0;
 }
-int h(int k) { return k % m; }
+int h(int k, int m) { return k % 7; }
