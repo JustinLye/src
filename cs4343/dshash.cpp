@@ -46,6 +46,22 @@ using namespace ds::hash_table;
 			}
 			return _nil;
 		}
+		int open_address::insert(int k, std::ostream& s) {
+			int j = _nil;
+			for (int i = 0; i < _size; i++) {
+				j = h(k, i);
+				s << "h(" << k << "," << i << ") = " << j;
+				if (_table[j] == _nil) {
+					s << " T[" << j << "] = NIL ==> T[" << j << "] = " << k << std::endl;
+					_table[j] = k;
+					return j;
+				} else {
+					s << " T[" << j << "] is occupied." << std::endl;
+				}
+			}
+			s << "Error hash table is full. Could not insert key " << k << std::endl;
+			return _nil;
+		}
 		void open_address::clear() {
 			if (_table != nullptr)
 				delete[] _table;
@@ -78,6 +94,21 @@ using namespace ds::hash_table;
 			val->next = temp;
 			if (temp != nullptr)
 				temp->prev = val;
+			_table[j] = val;
+			return j;
+		}
+		int base_chained::insert(int k, std::ostream& s) {
+			int j = h(k, _size);
+			s << "h(" << k << "," << _size << ") = " << j;
+			element* val = new element(k);
+			element* temp = _table[j];
+			val->next = temp;
+			if (temp != nullptr) {
+				s << " T[" << j << "] is occuppied => chain " << *val << std::endl;
+				temp->prev = val;
+			} else {
+				s << " T[" << j << "] = NIL => " << "T[" << j << "] = " << *val << std::endl;
+			}
 			_table[j] = val;
 			return j;
 		}
@@ -122,6 +153,7 @@ using namespace ds::hash_table;
 		/////////////////////////////////////////////////////////////////////
 		linear_probe::linear_probe(int init_size) : open_address(init_size) {}
 		int linear_probe::hash_insert(int k) { return insert(k); }
+		int linear_probe::hash_insert(int k, std::ostream& s) { return insert(k, s); }
 		int linear_probe::h(int k, int i) { return ((k + i) % _size); }
 
 		/////////////////////////////////////////////////////////////////////
@@ -146,4 +178,5 @@ using namespace ds::hash_table;
 		/////////////////////////////////////////////////////////////////////
 		chained::chained(int init_size) : base_chained(init_size, nullptr) {}
 		int chained::hash_insert(int k) { return insert(k); }
+		int chained::hash_insert(int k, std::ostream& s) { return insert(k, s); }
 		int chained::h(int k, int i) { return (k % _size); }

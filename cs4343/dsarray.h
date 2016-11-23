@@ -55,11 +55,11 @@ namespace ds {
 		int* _array;
 		//method to print array to given output s
 		void print(std::ostream& s) const {
-			std::cout << "[";
+			s << "[";
 			for (int i = 0; i < _length - 1; i++) {
-				std::cout << _array[i] << ',';
+				s << _array[i] << ',';
 			}
-			std::cout << _array[_length - 1] << "]";
+			s << _array[_length - 1] << "]";
 		}
 	private:
 		int_array() {}

@@ -27,6 +27,7 @@ namespace ds {
 			int (*_h)(int,int);
 			virtual int h(int k, int i) = 0;
 			virtual int insert(int k) = 0;
+			virtual int insert(int k, std::ostream& s) = 0;
 			virtual void clear() {}
 			virtual void print(std::ostream& s) const = 0;
 		};//base_hash_table
@@ -60,6 +61,7 @@ namespace ds {
 			// protected member methods
 			virtual int h(int k, int i);
 			int insert(int k);
+			int insert(int k, std::ostream& s);
 			void clear();
 			void print(std::ostream& s) const;
 		}; //open_address
@@ -71,11 +73,13 @@ namespace ds {
 		public:
 			base_chained(int init_size, int(*hash_function)(int, int));
 			~base_chained();
-			int hash_insert(int k) = 0;
+			virtual int hash_insert(int k) = 0;
+			virtual int hash_insert(int k, std::ostream& s) = 0;
 		protected:
 			element** _table;
 			virtual int h(int k, int i);
 			int insert(int k);
+			int insert(int k, std::ostream& s);
 			void clear();
 			void print(std::ostream& s) const;
 		}; //base_chained
@@ -94,8 +98,9 @@ namespace ds {
 		public:
 			linear_probe(int init_size);
 			int hash_insert(int k);
+			int hash_insert(int k, std::ostream& s);
 		protected:
-			int h(int k, int i);
+			virtual int h(int k, int i);
 		}; //linear_probe
 
 
@@ -127,6 +132,7 @@ namespace ds {
 		public:
 			chained(int init_size);
 			int hash_insert(int k);
+			int hash_insert(int k, std::ostream& s);
 		protected:
 			int h(int k, int i);
 		}; //chained
